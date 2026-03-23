@@ -1,0 +1,2 @@
+# China Strategy
+TMD Global = brain/IP/vision. TMD China = execution/operations/access. NOT a partnership. Michael: facilitator only, 7-8% per project, does NOT own IP or strategy. Risk: will try to become partner. Zhimou: active eVTOL client. Anji Fund: government hard-tech fund, enter with clear aviation focus. Principles: execution before structure, no pressure decisions, control of direction, value-driven compensation, long-term thinking.

@@ -1,0 +1,2 @@
+# TMD Strategy
+Current: transition from talent-dependent to scalable elite firm. 30 days: stop low-value work, raise prices, define 3 ideal client profiles. 90 days: one strategic retainer, restructure AIR, premium proposal templates. 180 days: two retainers, NuDay pilot complete, Zhimou delivered, TMD repositioned. Non-negotiables: never compete on price, every project builds reputation/IP/relationship, Tamir time = founder-level only.
