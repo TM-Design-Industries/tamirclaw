@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TAMIRCLAW Control Center</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html, body {
+            width: 100%;
+            height: 100%;
+        }
+        
+        body {
+            background: #0a0e27;
+            color: #e0e0e0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #0f1728 0%, #1a2a4a 100%);
+            border-bottom: 2px solid rgba(100, 200, 255, 0.3);
+            padding: 25px 20px;
+            margin-bottom: 30px;
+            border-radius: 8px;
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 {
+            font-size: 32px;
+            color: #64c8ff;
+            margin-bottom: 5px;
+        }
+        
+        .header p {
+            color: #888;
+            font-size: 12px;
+        }
+        
+        .status-badge {
+            text-align: right;
+        }
+        
+        .status-badge div {
+            font-size: 12px;
+            color: #64c8ff;
+            margin-bottom: 3px;
+        }
+        
+        .status-badge .sub {
+            font-size: 10px;
+            color: #666;
+        }
+        
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .metric {
+            background: rgba(20, 40, 80, 0.5);
+            border: 1px solid rgba(100, 200, 255, 0.2);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .metric-value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #64c8ff;
+            margin-bottom: 8px;
+        }
+        
+        .metric-label {
+            font-size: 11px;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+        }
+        
+        .section-title {
+            font-size: 16px;
+            color: #64c8ff;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+        
+        .layer-section {
+            background: rgba(20, 40, 80, 0.4);
+            border: 1px solid rgba(100, 150, 255, 0.2);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .layer-title {
+            font-size: 13px;
+            color: #64c8ff;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+        
+        .agent-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 10px;
+        }
+        
+        .agent-card {
+            background: linear-gradient(135deg, #1a2244 0%, #162a4a 100%);
+            border: 1px solid rgba(100, 200, 255, 0.3);
+            border-radius: 6px;
+            padding: 12px;
+            text-align: center;
+            font-size: 11px;
+            transition: all 0.3s ease;
+        }
+        
+        .agent-card:hover {
+            border-color: rgba(100, 200, 255, 0.8);
+            background: linear-gradient(135deg, #2a4466 0%, #1a3a5a 100%);
+        }
+        
+        .agent-card.active {
+            border-color: rgba(100, 200, 255, 0.8);
+            background: linear-gradient(135deg, #2a5599 0%, #1a4580 100%);
+            box-shadow: 0 0 15px rgba(100, 200, 255, 0.3);
+        }
+        
+        .agent-name {
+            color: #64c8ff;
+            font-weight: bold;
+            margin-bottom: 6px;
+        }
+        
+        .agent-status {
+            color: #888;
+            font-size: 10px;
+        }
+        
+        .orchestrator {
+            background: rgba(100, 200, 255, 0.15);
+            border: 2px solid rgba(100, 200, 255, 0.5);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        
+        .orchestrator-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: #64c8ff;
+            margin-bottom: 8px;
+        }
+        
+        .orchestrator-subtitle {
+            font-size: 11px;
+            color: #888;
+        }
+        
+        .kb-section {
+            background: rgba(76, 175, 80, 0.15);
+            border: 2px solid rgba(76, 175, 80, 0.5);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .kb-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: #4caf50;
+            margin-bottom: 8px;
+        }
+        
+        .kb-subtitle {
+            font-size: 11px;
+            color: #888;
+            margin-bottom: 12px;
+        }
+        
+        .kb-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(100, 200, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+        
+        .kb-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #64c8ff, #4caf50);
+            width: 42%;
+            transition: width 2s ease;
+        }
+        
+        .kb-capacity {
+            font-size: 10px;
+            color: #888;
+        }
+        
+        .project-item {
+            background: rgba(30, 60, 120, 0.3);
+            border-left: 3px solid #64c8ff;
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+        
+        .project-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        
+        .project-name {
+            font-weight: bold;
+            color: #e0e0e0;
+        }
+        
+        .project-meta {
+            font-size: 11px;
+            color: #888;
+        }
+        
+        .project-status {
+            font-size: 11px;
+            color: #64c8ff;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: rgba(100, 200, 255, 0.2);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-bottom: 6px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #64c8ff, #4a9fff);
+        }
+        
+        .progress-text {
+            font-size: 10px;
+            color: #666;
+        }
+        
+        .decision-item {
+            padding: 12px;
+            border-bottom: 1px solid rgba(100, 200, 255, 0.1);
+        }
+        
+        .decision-item:last-child {
+            border-bottom: none;
+        }
+        
+        .decision-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 4px;
+        }
+        
+        .decision-agent {
+            font-weight: bold;
+            color: #64c8ff;
+            font-size: 12px;
+        }
+        
+        .decision-time {
+            font-size: 11px;
+            color: #666;
+        }
+        
+        .decision-content {
+            font-size: 13px;
+            color: #ddd;
+            margin-bottom: 4px;
+        }
+        
+        .decision-project {
+            font-size: 11px;
+            color: #666;
+        }
+        
+        .decisions-container {
+            background: rgba(20, 40, 80, 0.4);
+            border-radius: 8px;
+            border: 1px solid rgba(100, 200, 255, 0.2);
+        }
+        
+        .footer {
+            margin-top: 40px;
+            padding: 15px;
+            background: rgba(20, 40, 80, 0.3);
+            border-radius: 8px;
+            text-align: center;
+            font-size: 11px;
+            color: #666;
+        }
+        
+        .footer div {
+            margin-bottom: 5px;
+        }
+        
+        .live-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #4caf50;
+            border-radius: 50%;
+            margin-right: 5px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-content">
+                <div>
+                    <h1>⚡ TAMIRCLAW CONTROL CENTER</h1>
+                    <p>Distributed Intelligence Operating System for TMD</p>
+                </div>
+                <div class="status-badge">
+                    <div><span class="live-indicator"></span>LIVE</div>
+                    <div class="sub">Status: Operational</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Metrics -->
+        <div class="metrics-grid">
+            <div class="metric">
+                <div class="metric-value">3</div>
+                <div class="metric-label">ACTIVE PROJECTS</div>
+            </div>
+            <div class="metric">
+                <div class="metric-value">35</div>
+                <div class="metric-label">AGENTS ONLINE</div>
+            </div>
+            <div class="metric">
+                <div class="metric-value">8.4</div>
+                <div class="metric-label">AVG QUALITY SCORE</div>
+            </div>
+            <div class="metric">
+                <div class="metric-value">42%</div>
+                <div class="metric-label">KB CAPACITY</div>
+            </div>
+        </div>
+        
+        <!-- Architecture -->
+        <div class="section">
+            <div class="section-title">⚙️ SYSTEM ARCHITECTURE</div>
+            
+            <!-- Layer 1 -->
+            <div class="layer-section">
+                <div class="layer-title">Layer 1: Infrastructure Agents (12)</div>
+                <div class="agent-grid">
+                    <div class="agent-card active"><div class="agent-name">Email</div><div class="agent-status">✓ Active</div></div>
+                    <div class="agent-card active"><div class="agent-name">Invoice</div><div class="agent-status">✓ Active</div></div>
+                    <div class="agent-card active"><div class="agent-name">Quotes</div><div class="agent-status">✓ Active</div></div>
+                    <div class="agent-card active"><div class="agent-name">Projects</div><div class="agent-status">✓ Active</div></div>
+                    <div class="agent-card active"><div class="agent-name">Scheduler</div><div class="agent-status">✓ Active</div></div>
+                    <div class="agent-card active"><div class="agent-name">Documents</div><div class="agent-status">✓ Active</div></div>
+                    <div class="agent-card"><div class="agent-name">Accounting</div><div class="agent-status">Idle</div></div>
+                    <div class="agent-card"><div class="agent-name">CRM</div><div class="agent-status">Idle</div></div>
+                    <div class="agent-card"><div class="agent-name">HR Ops</div><div class="agent-status">Idle</div></div>
+                    <div class="agent-card"><div class="agent-name">Vendors</div><div class="agent-status">Idle</div></div>
+                    <div class="agent-card"><div class="agent-name">Legal/IP</div><div class="agent-status">Idle</div></div>
+                    <div class="agent-card"><div class="agent-name">Compliance</div><div class="agent-status">Idle</div></div>
+                </div>
+            </div>
+            
+            <!-- Orchestrator -->
+            <div class="orchestrator">
+                <div class="orchestrator-title">🧠 ORCHESTRATOR (Router + Coordinator)</div>
+                <div class="orchestrator-subtitle">Priority Queue • Context Manager • Conflict Detector • Quality Gates</div>
+            </div>
+            
+            <!-- Layer 2 -->
+            <div class="layer-section">
+                <div class="layer-title">Layer 2: Domain Specialists (7)</div>
+                <div class="agent-grid">
+                    <div class="agent-card active"><div class="agent-name">Vehicle</div><div class="agent-status">Specialist</div></div>
+                    <div class="agent-card active"><div class="agent-name">Aircraft</div><div class="agent-status">Specialist</div></div>
+                    <div class="agent-card active"><div class="agent-name">Marine</div><div class="agent-status">Specialist</div></div>
+                    <div class="agent-card"><div class="agent-name">Autonomous</div><div class="agent-status">Specialist</div></div>
+                    <div class="agent-card"><div class="agent-name">Transit</div><div class="agent-status">Specialist</div></div>
+                    <div class="agent-card"><div class="agent-name">Architecture</div><div class="agent-status">Specialist</div></div>
+                    <div class="agent-card"><div class="agent-name">Industrial</div><div class="agent-status">Specialist</div></div>
+                </div>
+            </div>
+            
+            <!-- Layer 3 -->
+            <div class="layer-section">
+                <div class="layer-title">Layer 3: Execution Experts (13)</div>
+                <div class="agent-grid">
+                    <div class="agent-card active"><div class="agent-name">Mechanical</div><div class="agent-status">Engineer</div></div>
+                    <div class="agent-card active"><div class="agent-name">Structural</div><div class="agent-status">Engineer</div></div>
+                    <div class="agent-card active"><div class="agent-name">Thermal</div><div class="agent-status">Engineer</div></div>
+                    <div class="agent-card active"><div class="agent-name">Aero</div><div class="agent-status">Engineer</div></div>
+                    <div class="agent-card active"><div class="agent-name">Hydro</div><div class="agent-status">Engineer</div></div>
+                    <div class="agent-card active"><div class="agent-name">Materials</div><div class="agent-status">Engineer</div></div>
+                    <div class="agent-card active"><div class="agent-name">Composites</div><div class="agent-status">Engineer</div></div>
+                    <div class="agent-card active"><div class="agent-name">DFM</div><div class="agent-status">Engineer</div></div>
+                    <div class="agent-card"><div class="agent-name">Design</div><div class="agent-status">Engineer</div></div>
+                    <div class="agent-card"><div class="agent-name">UX/UI</div><div class="agent-status">Engineer</div></div>
+                    <div class="agent-card"><div class="agent-name">CMF</div><div class="agent-status">Engineer</div></div>
+                    <div class="agent-card"><div class="agent-name">Systems</div><div class="agent-status">Engineer</div></div>
+                    <div class="agent-card"><div class="agent-name">Software</div><div class="agent-status">Engineer</div></div>
+                </div>
+            </div>
+            
+            <!-- Knowledge Base -->
+            <div class="kb-section">
+                <div class="kb-title">📚 SHARED KNOWLEDGE BASE</div>
+                <div class="kb-subtitle">Projects • Patterns • Specs • Vendors • Market Data • Regulations • Lessons</div>
+                <div class="kb-bar">
+                    <div class="kb-fill"></div>
+                </div>
+                <div class="kb-capacity">Growing with every project (42% capacity)</div>
+            </div>
+        </div>
+        
+        <!-- Active Projects -->
+        <div class="section">
+            <div class="section-title">📊 ACTIVE PROJECTS</div>
+            
+            <div class="project-item">
+                <div class="project-header">
+                    <div><span class="project-name">Audi Interior</span> <span class="project-meta">(Automotive)</span></div>
+                    <span class="project-status">Design Phase</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 65%"></div>
+                </div>
+                <div class="progress-text">65% Complete</div>
+            </div>
+            
+            <div class="project-item">
+                <div class="project-header">
+                    <div><span class="project-name">eVTOL Cockpit</span> <span class="project-meta">(Aircraft)</span></div>
+                    <span class="project-status">Engineering Phase</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 45%"></div>
+                </div>
+                <div class="progress-text">45% Complete</div>
+            </div>
+            
+            <div class="project-item">
+                <div class="project-header">
+                    <div><span class="project-name">Marine Vessel</span> <span class="project-meta">(Marine)</span></div>
+                    <span class="project-status">Planning Phase</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 30%"></div>
+                </div>
+                <div class="progress-text">30% Complete</div>
+            </div>
+        </div>
+        
+        <!-- Recent Decisions -->
+        <div class="section">
+            <div class="section-title">✓ RECENT DECISIONS</div>
+            
+            <div class="decisions-container">
+                <div class="decision-item">
+                    <div class="decision-header">
+                        <span class="decision-agent">Material Engineer</span>
+                        <span class="decision-time">2 min ago</span>
+                    </div>
+                    <div class="decision-content">→ Use Aluminum 7075-T6 for structural frame</div>
+                    <div class="decision-project">Project: Audi Interior</div>
+                </div>
+                
+                <div class="decision-item">
+                    <div class="decision-header">
+                        <span class="decision-agent">DFM Agent</span>
+                        <span class="decision-time">15 min ago</span>
+                    </div>
+                    <div class="decision-content">→ CNC machining approved for precision components</div>
+                    <div class="decision-project">Project: eVTOL Cockpit</div>
+                </div>
+                
+                <div class="decision-item">
+                    <div class="decision-header">
+                        <span class="decision-agent">Vehicle Specialist</span>
+                        <span class="decision-time">1 hour ago</span>
+                    </div>
+                    <div class="decision-content">→ Market analysis complete: targeting premium segment</div>
+                    <div class="decision-project">Project: Marine Vessel</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="footer">
+            <div>TamirClaw v2.0 • Operational Since 2026-03-24 • All Systems Green ✓</div>
+            <div>Next Update: Real-time • Data Refresh: Every 3 seconds</div>
+        </div>
+    </div>
+</body>
+</html>
