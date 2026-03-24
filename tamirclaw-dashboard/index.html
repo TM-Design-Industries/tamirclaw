@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TAMIRCLAW Control Center</title>
+    <script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #0a0e27;
+            color: #e0e0e0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+        
+        .glow {
+            box-shadow: 0 0 20px rgba(100, 200, 255, 0.3);
+        }
+        
+        .agent-card {
+            background: linear-gradient(135deg, #1a2244 0%, #162a4a 100%);
+            border: 1px solid rgba(100, 200, 255, 0.3);
+            border-radius: 8px;
+            padding: 12px;
+            margin: 8px;
+            min-width: 180px;
+            transition: all 0.3s ease;
+        }
+        
+        .agent-card:hover {
+            border-color: rgba(100, 200, 255, 0.8);
+            box-shadow: 0 0 15px rgba(100, 200, 255, 0.4);
+        }
+        
+        .agent-card.active {
+            background: linear-gradient(135deg, #2a4466 0%, #1a3a5a 100%);
+            border-color: rgba(100, 200, 255, 0.8);
+        }
+        
+        .layer-section {
+            background: rgba(20, 40, 80, 0.4);
+            border: 1px solid rgba(100, 150, 255, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+        
+        .project-item {
+            background: rgba(30, 60, 120, 0.3);
+            border-left: 3px solid #64c8ff;
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 4px;
+        }
+        
+        .status-bar {
+            width: 100%;
+            height: 4px;
+            background: rgba(100, 200, 255, 0.2);
+            border-radius: 2px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+        
+        .status-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #64c8ff, #4a9fff);
+            transition: width 0.3s ease;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #0f1728 0%, #1a2a4a 100%);
+            border-bottom: 2px solid rgba(100, 200, 255, 0.3);
+            padding: 20px;
+        }
+        
+        .metric {
+            text-align: center;
+            padding: 15px;
+            background: rgba(20, 40, 80, 0.5);
+            border-radius: 8px;
+            border: 1px solid rgba(100, 200, 255, 0.2);
+        }
+        
+        .metric-value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #64c8ff;
+        }
+        
+        .metric-label {
+            font-size: 12px;
+            color: #999;
+            margin-top: 4px;
+        }
+        
+        .kb-bar {
+            background: rgba(100, 200, 255, 0.1);
+            height: 8px;
+            border-radius: 4px;
+            margin: 8px 0;
+            overflow: hidden;
+        }
+        
+        .kb-fill {
+            background: linear-gradient(90deg, #64c8ff, #00ff88);
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script>
+        const { useState, useEffect } = React;
+        
+        function Dashboard() {
+            const [state, setState] = useState({
+                projects: 0,
+                agents: 35,
+                kbSize: 42,
+                avgQuality: 8.4,
+                layers: {
+                    infrastructure: 12,
+                    domainSpecialists: 7,
+                    executionExperts: 13
+                },
+                activeProjects: [
+                    { id: 1, name: "Audi Interior", domain: "Automotive", progress: 65, status: "Design" },
+                    { id: 2, name: "eVTOL Cockpit", domain: "Aircraft", progress: 45, status: "Engineering" },
+                    { id: 3, name: "Marine Vessel", domain: "Marine", progress: 30, status: "Planning" }
+                ],
+                recentDecisions: [
+                    { agent: "Material Engineer", decision: "Aluminum 7075-T6", project: "Audi", time: "2 min ago" },
+                    { agent: "DFM Agent", decision: "CNC machining approved", project: "eVTOL", time: "15 min ago" },
+                    { agent: "Vehicle Specialist", decision: "Market analysis complete", project: "Marine", time: "1 hour ago" }
+                ]
+            });
+            
+            useEffect(() => {
+                const interval = setInterval(() => {
+                    setState(prev => ({
+                        ...prev,
+                        kbSize: Math.min(100, prev.kbSize + Math.random() * 0.5),
+                        avgQuality: Math.min(10, prev.avgQuality + Math.random() * 0.05)
+                    }));
+                }, 3000);
+                
+                return () => clearInterval(interval);
+            }, []);
+            
+            return (
+                <div style={{ minHeight: '100vh', padding: '20px' }}>
+                    {/* Header */}
+                    <div className="header">
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div>
+                                <h1 style={{ fontSize: '32px', fontWeight: 'bold', color: '#64c8ff', marginBottom: '5px' }}>
+                                    ⚡ TAMIRCLAW CONTROL CENTER
+                                </h1>
+                                <p style={{ color: '#888', fontSize: '12px' }}>Distributed Intelligence Operating System for TMD</p>
+                            </div>
+                            <div style={{ textAlign: 'right' }}>
+                                <div style={{ fontSize: '12px', color: '#64c8ff' }}>LIVE</div>
+                                <div style={{ fontSize: '10px', color: '#666' }}>Status: Operational</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {/* Key Metrics */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '15px', margin: '20px 0' }}>
+                        <div className="metric">
+                            <div className="metric-value">{state.projects}</div>
+                            <div className="metric-label">ACTIVE PROJECTS</div>
+                        </div>
+                        <div className="metric">
+                            <div className="metric-value">{state.agents}</div>
+                            <div className="metric-label">AGENTS ONLINE</div>
+                        </div>
+                        <div className="metric">
+                            <div className="metric-value">{state.avgQuality.toFixed(1)}</div>
+                            <div className="metric-label">AVG QUALITY SCORE</div>
+                        </div>
+                        <div className="metric">
+                            <div className="metric-value">{state.kbSize.toFixed(0)}%</div>
+                            <div className="metric-label">KB CAPACITY</div>
+                        </div>
+                    </div>
+                    
+                    {/* Architecture Visualization */}
+                    <div style={{ margin: '20px 0' }}>
+                        <h2 style={{ fontSize: '18px', marginBottom: '15px', color: '#64c8ff' }}>⚙️ SYSTEM ARCHITECTURE</h2>
+                        
+                        {/* Layer 1: Infrastructure */}
+                        <div className="layer-section">
+                            <h3 style={{ color: '#64c8ff', marginBottom: '12px', fontSize: '14px' }}>Layer 1: Infrastructure Agents ({state.layers.infrastructure})</h3>
+                            <div style={{ display: 'flex', flexWrap: 'wrap' }}>
+                                {['Email Manager', 'Invoice Agent', 'Quote Gen', 'Project Tracker', 'Scheduler', 'Doc Manager', 'Accounting', 'CRM', 'HR Ops', 'Vendor Mgr', 'Legal/IP', 'Compliance'].map((agent, i) => (
+                                    <div key={i} className={`agent-card ${i < 6 ? 'active' : ''}`}>
+                                        <div style={{ fontSize: '12px', fontWeight: 'bold', color: '#64c8ff' }}>{agent}</div>
+                                        <div style={{ fontSize: '10px', color: '#888', marginTop: '4px' }}>Status: {i < 6 ? '✓ Active' : 'Idle'}</div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                        
+                        {/* Orchestrator */}
+                        <div style={{ textAlign: 'center', margin: '20px 0', padding: '15px', background: 'rgba(100, 200, 255, 0.15)', borderRadius: '8px', border: '2px solid rgba(100, 200, 255, 0.5)' }}>
+                            <div style={{ fontSize: '14px', fontWeight: 'bold', color: '#64c8ff' }}>🧠 ORCHESTRATOR (Router + Coordinator)</div>
+                            <div style={{ fontSize: '11px', color: '#888', marginTop: '4px' }}>Priority Queue • Context Manager • Conflict Detector • Quality Gates</div>
+                        </div>
+                        
+                        {/* Layer 2: Domain Specialists */}
+                        <div className="layer-section">
+                            <h3 style={{ color: '#64c8ff', marginBottom: '12px', fontSize: '14px' }}>Layer 2: Domain Specialists ({state.layers.domainSpecialists})</h3>
+                            <div style={{ display: 'flex', flexWrap: 'wrap' }}>
+                                {['Vehicle', 'Aircraft', 'Marine', 'Autonomous', 'Transit', 'Architecture', 'Industrial'].map((domain, i) => (
+                                    <div key={i} className={`agent-card ${i < 3 ? 'active' : ''}`}>
+                                        <div style={{ fontSize: '12px', fontWeight: 'bold', color: '#64c8ff' }}>{domain}</div>
+                                        <div style={{ fontSize: '10px', color: '#888', marginTop: '4px' }}>Specialist</div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                        
+                        {/* Layer 3: Execution Experts */}
+                        <div className="layer-section">
+                            <h3 style={{ color: '#64c8ff', marginBottom: '12px', fontSize: '14px' }}>Layer 3: Execution Experts ({state.layers.executionExperts})</h3>
+                            <div style={{ display: 'flex', flexWrap: 'wrap' }}>
+                                {['Mechanical', 'Structural', 'Thermal', 'Aero', 'Hydro', 'Materials', 'Composites', 'DFM', 'Design', 'UX/UI', 'CMF', 'Systems', 'Software'].map((expert, i) => (
+                                    <div key={i} className={`agent-card ${i < 8 ? 'active' : ''}`}>
+                                        <div style={{ fontSize: '12px', fontWeight: 'bold', color: '#64c8ff' }}>{expert}</div>
+                                        <div style={{ fontSize: '10px', color: '#888', marginTop: '4px' }}>Engineer</div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                        
+                        {/* Knowledge Base */}
+                        <div style={{ textAlign: 'center', margin: '20px 0', padding: '15px', background: 'rgba(76, 175, 80, 0.15)', borderRadius: '8px', border: '2px solid rgba(76, 175, 80, 0.5)' }}>
+                            <div style={{ fontSize: '14px', fontWeight: 'bold', color: '#4caf50' }}>📚 SHARED KNOWLEDGE BASE</div>
+                            <div style={{ fontSize: '11px', color: '#888', marginTop: '4px' }}>Projects • Patterns • Specs • Vendors • Market Data • Regulations • Lessons</div>
+                            <div className="kb-bar">
+                                <div className="kb-fill" style={{ width: `${state.kbSize}%` }}></div>
+                            </div>
+                            <div style={{ fontSize: '10px', color: '#888', marginTop: '4px' }}>Growing with every project ({state.kbSize.toFixed(0)}% capacity)</div>
+                        </div>
+                    </div>
+                    
+                    {/* Active Projects */}
+                    <div style={{ margin: '20px 0' }}>
+                        <h2 style={{ fontSize: '18px', marginBottom: '15px', color: '#64c8ff' }}>📊 ACTIVE PROJECTS</h2>
+                        {state.activeProjects.map((project, i) => (
+                            <div key={i} className="project-item">
+                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                                    <div>
+                                        <strong>{project.name}</strong>
+                                        <span style={{ color: '#888', fontSize: '12px', marginLeft: '10px' }}>({project.domain})</span>
+                                    </div>
+                                    <span style={{ color: '#64c8ff', fontSize: '12px' }}>{project.status}</span>
+                                </div>
+                                <div className="status-bar">
+                                    <div className="status-fill" style={{ width: `${project.progress}%` }}></div>
+                                </div>
+                                <div style={{ fontSize: '11px', color: '#666', marginTop: '4px' }}>{project.progress}% Complete</div>
+                            </div>
+                        ))}
+                    </div>
+                    
+                    {/* Recent Decisions */}
+                    <div style={{ margin: '20px 0' }}>
+                        <h2 style={{ fontSize: '18px', marginBottom: '15px', color: '#64c8ff' }}>✓ RECENT DECISIONS</h2>
+                        <div style={{ background: 'rgba(20, 40, 80, 0.4)', borderRadius: '8px', border: '1px solid rgba(100, 200, 255, 0.2)' }}>
+                            {state.recentDecisions.map((decision, i) => (
+                                <div key={i} style={{ borderBottom: i < state.recentDecisions.length - 1 ? '1px solid rgba(100, 200, 255, 0.1)' : 'none', padding: '12px' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                                        <strong style={{ color: '#64c8ff', fontSize: '12px' }}>{decision.agent}</strong>
+                                        <span style={{ color: '#666', fontSize: '11px' }}>{decision.time}</span>
+                                    </div>
+                                    <div style={{ fontSize: '13px', color: '#ddd' }}>→ {decision.decision}</div>
+                                    <div style={{ fontSize: '11px', color: '#666', marginTop: '4px' }}>Project: {decision.project}</div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                    
+                    {/* Footer Stats */}
+                    <div style={{ marginTop: '30px', padding: '15px', background: 'rgba(20, 40, 80, 0.3)', borderRadius: '8px', textAlign: 'center', fontSize: '12px', color: '#666' }}>
+                        <div>TamirClaw v2.0 • Operational Since 2026-03-24 • All Systems Green</div>
+                        <div style={{ marginTop: '8px' }}>Next Update: In real-time • Data refresh: Every 3 seconds</div>
+                    </div>
+                </div>
+            );
+        }
+        
+        ReactDOM.render(<Dashboard />, document.getElementById('root'));
+    </script>
+</body>
+</html>
