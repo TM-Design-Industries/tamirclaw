@@ -1,0 +1,47 @@
+{
+  "name": "mission-gates",
+  "version": "2.0.0",
+  "description": "Mission-driven quality gates enforcing alignment with nature, humanity, conscience, and venture synergy",
+  "type": "quality-gate",
+  "inputs": {
+    "project": {
+      "type": "object",
+      "properties": {
+        "id": {"type": "string"},
+        "name": {"type": "string"},
+        "venture_id": {"type": "string"},
+        "description": {"type": "string"}
+      }
+    },
+    "scores": {
+      "type": "object",
+      "properties": {
+        "desirability": {"type": "number", "min": 0, "max": 10},
+        "functionality": {"type": "number", "min": 0, "max": 10},
+        "manufacturability": {"type": "number", "min": 0, "max": 10},
+        "credibility": {"type": "number", "min": 0, "max": 10},
+        "viability": {"type": "number", "min": 0, "max": 10},
+        "differentiation": {"type": "number", "min": 0, "max": 10},
+        "aesthetics": {"type": "number", "min": 0, "max": 10},
+        "performance": {"type": "number", "min": 0, "max": 10},
+        "helps_nature": {"type": "number", "min": 0, "max": 10, "description": "Does this help nature flourish?"},
+        "helps_humanity": {"type": "number", "min": 0, "max": 10, "description": "Does this genuinely help humanity?"},
+        "conscience_approval": {"type": "number", "min": 0, "max": 10, "description": "Would Tamir's conscience approve?"},
+        "venture_synergy": {"type": "number", "min": 0, "max": 10, "description": "Does this amplify other ventures?"}
+      }
+    }
+  },
+  "outputs": {
+    "mission_assessment": {
+      "type": "object",
+      "properties": {
+        "status": {"type": "string", "enum": ["PASS", "FAIL", "CONDITIONAL"]},
+        "mission_score": {"type": "number"},
+        "quality_score": {"type": "number"},
+        "overall_score": {"type": "number"},
+        "mission_verdict": {"type": "string"},
+        "reasons": {"type": "array"}
+      }
+    }
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "name": "venture-orchestrator",
+  "version": "2.0.0",
+  "description": "Portfolio-level venture orchestrator managing 10-12 ventures, synergy detection, mission alignment",
+  "type": "orchestrator",
+  "inputs": {
+    "ventures": {
+      "type": "array",
+      "description": "List of all active ventures (NuDay, BetterRide, ANY1, etc.)",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "string"},
+          "name": {"type": "string"},
+          "mission": {"type": "string"},
+          "projects": {"type": "array"}
+        }
+      }
+    },
+    "action": {
+      "type": "string",
+      "enum": ["optimize_portfolio", "detect_synergy", "allocate_resources", "get_synergy_score"]
+    }
+  },
+  "outputs": {
+    "portfolio_optimization": {
+      "type": "object",
+      "properties": {
+        "high_synergy_clusters": {"type": "array"},
+        "resource_allocation": {"type": "object"},
+        "synergy_score": {"type": "number"},
+        "optimization_ratio": {"type": "number"}
+      }
+    }
+  }
+}
