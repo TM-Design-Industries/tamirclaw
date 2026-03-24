@@ -1,0 +1,34 @@
+{
+  "name": "Quote Generator Agent",
+  "purpose": "Generate professional proposals and pricing quotes from project specifications",
+  "layer": "infrastructure",
+  "version": "1.0",
+  "inputs": {
+    "type": "object",
+    "required": ["action", "data"],
+    "properties": {
+      "action": {
+        "type": "string",
+        "enum": ["generate_quote", "estimate_cost", "generate_proposal"],
+        "description": "What action to perform"
+      },
+      "data": {
+        "type": "object",
+        "description": "Project details for quote generation"
+      }
+    }
+  },
+  "outputs": {
+    "type": "object",
+    "properties": {
+      "success": {"type": "boolean"},
+      "quote_id": {"type": "string"},
+      "cost_estimate": {"type": "number"},
+      "timeline": {"type": "object"},
+      "proposal": {"type": "string"},
+      "data": {"type": "object"}
+    }
+  },
+  "decision_level": 1,
+  "decision_scope": "Quote calculation - no judgment, follows pricing rules"
+}
