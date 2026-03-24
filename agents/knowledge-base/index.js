@@ -14,7 +14,8 @@ const https = require('https');
 class KnowledgeBaseAgent {
   constructor(geminiApiKey) {
     this.name = 'Knowledge Base';
-    this.geminiApiKey = geminiApiKey;
+    // Use provided API key or fallback to environment
+    this.geminiApiKey = geminiApiKey || process.env.GEMINI_API_KEY || 'AIzaSyCzxYYoFjz8EN4y8lLeh-_HqxdeBno80t0';
     this.geminiEndpoint = 'https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:embedContent';
     
     // In-memory storage (replace with DB later)
