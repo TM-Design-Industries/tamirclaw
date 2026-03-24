@@ -1,0 +1,32 @@
+{
+  "name": "Knowledge Base Agent",
+  "purpose": "Store, retrieve, and learn from project data using semantic search",
+  "layer": "core",
+  "version": "1.0",
+  "inputs": {
+    "type": "object",
+    "required": ["action", "data"],
+    "properties": {
+      "action": {
+        "type": "string",
+        "enum": ["store_project", "query", "extract_lessons", "search_similar"],
+        "description": "What action to perform"
+      },
+      "data": {
+        "type": "object",
+        "description": "Project data or search query"
+      }
+    }
+  },
+  "outputs": {
+    "type": "object",
+    "properties": {
+      "success": {"type": "boolean"},
+      "results": {"type": "array"},
+      "lessons": {"type": "array"},
+      "data": {"type": "object"}
+    }
+  },
+  "decision_level": 1,
+  "decision_scope": "Knowledge storage and retrieval - no judgment"
+}
