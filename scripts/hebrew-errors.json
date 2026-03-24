@@ -1,0 +1,48 @@
+{
+  "verb_binyan": {
+    "בנאתי": { "fix": "בניתי", "reason": "pa'al, not weak form" },
+    "רצתי": { "fix": "הרצתי", "reason": "hif'il - running as action verb" },
+    "לא יקרה": { "fix": "לא קורה", "reason": "present, not future" },
+    "הנתתי": { "fix": "נתתי", "reason": "no he prefix for natan" },
+    "שמאתי": { "fix": "שמתי", "reason": "sham is weak verb" }
+  },
+  "calques": {
+    "אני לא מבין אותך": { "fix": "לא הבנתי אותך", "reason": "past tense more natural" },
+    "בואו נעשה": { "fix": "בואו נ[verb]", "reason": "use proper imperative" },
+    "צודק לחלוטין": { "fix": "צודק", "reason": "overly formal" },
+    "הערכה הנכונה": { "fix": "הערכה מדוייקת", "reason": "better word choice" },
+    "מה המשמעות": { "fix": "מה הכוונה", "reason": "more natural" },
+    "מה הטעם": { "fix": "למה", "reason": "better phrasing" }
+  },
+  "gender_agreement": {
+    "הערכה.*טוב[^ה]": { "fix": "הערכה טובה", "reason": "fem singular" },
+    "תשובה.*נכון[^ה]": { "fix": "תשובה נכונה", "reason": "fem singular" },
+    "דרך.*קצר[^ה]": { "fix": "דרך קצרה", "reason": "fem singular" },
+    "מטרה.*ברור[^ה]": { "fix": "מטרה ברורה", "reason": "fem singular" },
+    "מערכת.*טוב[^ה]": { "fix": "מערכת טובה", "reason": "fem singular" }
+  },
+  "mixed_language": {
+    "Agent": { "fix": "סוכן", "reason": "use Hebrew term" },
+    "pattern": { "fix": "דפוס", "reason": "use Hebrew term" },
+    "matching": { "fix": "התאמה", "reason": "use Hebrew term" },
+    "validation": { "fix": "בדיקה", "reason": "use Hebrew term" },
+    "complexity": { "fix": "מורכבות", "reason": "use Hebrew term" }
+  },
+  "over_formality": {
+    "לחלוטין": { "alternative": "באמת / בדיוק", "reason": "casual is better" },
+    "כפי שניתן לראות": { "alternative": "כמו שאתה רואה", "reason": "more casual" },
+    "בנוסף לכך": { "alternative": "גם", "reason": "simpler" },
+    "לפי הנתונים": { "alternative": "הנתונים מראים", "reason": "more direct" }
+  },
+  "syntax": {
+    "זה לא קיים": "OK",
+    "זה לא אפשרי": "OK",
+    "זה לא עובד כי": "OK",
+    "המשמעות היא": "OK",
+    "העיקרון הוא": "OK"
+  },
+  "tamir_corrections": {
+    "note": "Every correction Tamir makes gets added here with timestamp",
+    "last_updated": "2026-03-24T20:19Z"
+  }
+}
