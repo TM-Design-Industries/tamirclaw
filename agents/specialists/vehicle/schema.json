@@ -1,0 +1,33 @@
+{
+  "name": "Vehicle Specialist Agent",
+  "purpose": "Provide automotive domain expertise and market analysis",
+  "layer": "specialists",
+  "domain": "automotive",
+  "version": "1.0",
+  "inputs": {
+    "type": "object",
+    "required": ["action", "data"],
+    "properties": {
+      "action": {
+        "type": "string",
+        "enum": ["analyze_project", "market_assessment", "regulatory_check", "vendor_recommendation"],
+        "description": "What analysis to perform"
+      },
+      "data": {
+        "type": "object",
+        "description": "Project details for analysis"
+      }
+    }
+  },
+  "outputs": {
+    "type": "object",
+    "properties": {
+      "success": {"type": "boolean"},
+      "analysis": {"type": "object"},
+      "feasibility": {"type": "string"},
+      "risks": {"type": "array"}
+    }
+  },
+  "decision_level": 2,
+  "decision_scope": "Domain expertise - market and regulatory knowledge"
+}
