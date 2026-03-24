@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TAMIRCLAW Control Center</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -11,528 +12,494 @@
             box-sizing: border-box;
         }
         
-        html, body {
-            width: 100%;
-            height: 100%;
-        }
-        
         body {
             background: #0a0e27;
             color: #e0e0e0;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            overflow-x: hidden;
+            overflow: hidden;
         }
         
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
+        #container {
+            display: flex;
+            height: 100vh;
+        }
+        
+        #sidebar {
+            width: 280px;
+            background: rgba(15, 23, 40, 0.95);
+            border-right: 1px solid rgba(100, 200, 255, 0.2);
             padding: 20px;
+            overflow-y: auto;
+            box-shadow: -2px 0 10px rgba(0, 0, 0, 0.3);
         }
         
-        .header {
+        #main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        #header {
             background: linear-gradient(135deg, #0f1728 0%, #1a2a4a 100%);
             border-bottom: 2px solid rgba(100, 200, 255, 0.3);
-            padding: 25px 20px;
-            margin-bottom: 30px;
-            border-radius: 8px;
+            padding: 15px 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
         }
         
-        .header-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .header h1 {
-            font-size: 32px;
-            color: #64c8ff;
-            margin-bottom: 5px;
-        }
-        
-        .header p {
-            color: #888;
-            font-size: 12px;
-        }
-        
-        .status-badge {
-            text-align: right;
-        }
-        
-        .status-badge div {
-            font-size: 12px;
+        #header h1 {
+            font-size: 24px;
             color: #64c8ff;
             margin-bottom: 3px;
         }
         
-        .status-badge .sub {
-            font-size: 10px;
-            color: #666;
-        }
-        
-        .metrics-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-            margin-bottom: 30px;
-        }
-        
-        .metric {
-            background: rgba(20, 40, 80, 0.5);
-            border: 1px solid rgba(100, 200, 255, 0.2);
-            border-radius: 8px;
-            padding: 20px;
-            text-align: center;
-        }
-        
-        .metric-value {
-            font-size: 28px;
-            font-weight: bold;
-            color: #64c8ff;
-            margin-bottom: 8px;
-        }
-        
-        .metric-label {
+        #header p {
             font-size: 11px;
-            color: #999;
+            color: #888;
+        }
+        
+        #graph {
+            flex: 1;
+            background: #0a0e27;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        svg {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .node {
+            cursor: pointer;
+            stroke: rgba(100, 200, 255, 0.4);
+            stroke-width: 2px;
+        }
+        
+        .node:hover {
+            stroke: #64c8ff;
+            stroke-width: 3px;
+            filter: drop-shadow(0 0 10px rgba(100, 200, 255, 0.6));
+        }
+        
+        .node.active {
+            stroke: #64c8ff;
+            stroke-width: 3px;
+            filter: drop-shadow(0 0 15px rgba(100, 200, 255, 0.8));
+        }
+        
+        .link {
+            stroke: rgba(100, 200, 255, 0.15);
+            stroke-width: 1.5px;
+        }
+        
+        .link.active {
+            stroke: rgba(100, 200, 255, 0.6);
+            stroke-width: 2.5px;
+        }
+        
+        .node-label {
+            font-size: 11px;
+            font-weight: bold;
+            text-anchor: middle;
+            pointer-events: none;
+            fill: #e0e0e0;
+        }
+        
+        .node-label.small {
+            font-size: 9px;
+        }
+        
+        /* Layer Colors */
+        .layer-infrastructure { fill: #ff6b6b; }
+        .layer-specialists { fill: #4ecdc4; }
+        .layer-execution { fill: #45b7d1; }
+        .layer-orchestrator { fill: #f9ca24; }
+        .layer-kb { fill: #6bcf7f; }
+        .layer-tamir { fill: #a29bfe; }
+        
+        /* Sidebar */
+        .sidebar-section {
+            margin-bottom: 20px;
+        }
+        
+        .sidebar-title {
+            font-size: 12px;
+            color: #64c8ff;
+            font-weight: bold;
+            margin-bottom: 10px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
         
-        .section {
-            margin-bottom: 30px;
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 11px;
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 4px;
+            transition: background 0.2s;
         }
         
-        .section-title {
-            font-size: 16px;
-            color: #64c8ff;
-            margin-bottom: 15px;
-            font-weight: bold;
+        .legend-item:hover {
+            background: rgba(100, 200, 255, 0.1);
         }
         
-        .layer-section {
-            background: rgba(20, 40, 80, 0.4);
-            border: 1px solid rgba(100, 150, 255, 0.2);
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 15px;
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
         }
         
-        .layer-title {
-            font-size: 13px;
-            color: #64c8ff;
-            margin-bottom: 15px;
-            font-weight: bold;
-        }
-        
-        .agent-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 10px;
-        }
-        
-        .agent-card {
-            background: linear-gradient(135deg, #1a2244 0%, #162a4a 100%);
-            border: 1px solid rgba(100, 200, 255, 0.3);
+        .metrics {
+            background: rgba(20, 40, 80, 0.3);
+            border: 1px solid rgba(100, 200, 255, 0.2);
             border-radius: 6px;
             padding: 12px;
-            text-align: center;
             font-size: 11px;
-            transition: all 0.3s ease;
-        }
-        
-        .agent-card:hover {
-            border-color: rgba(100, 200, 255, 0.8);
-            background: linear-gradient(135deg, #2a4466 0%, #1a3a5a 100%);
-        }
-        
-        .agent-card.active {
-            border-color: rgba(100, 200, 255, 0.8);
-            background: linear-gradient(135deg, #2a5599 0%, #1a4580 100%);
-            box-shadow: 0 0 15px rgba(100, 200, 255, 0.3);
-        }
-        
-        .agent-name {
-            color: #64c8ff;
-            font-weight: bold;
-            margin-bottom: 6px;
-        }
-        
-        .agent-status {
-            color: #888;
-            font-size: 10px;
-        }
-        
-        .orchestrator {
-            background: rgba(100, 200, 255, 0.15);
-            border: 2px solid rgba(100, 200, 255, 0.5);
-            border-radius: 8px;
-            padding: 20px;
-            text-align: center;
             margin-bottom: 15px;
         }
         
-        .orchestrator-title {
-            font-size: 14px;
-            font-weight: bold;
-            color: #64c8ff;
-            margin-bottom: 8px;
-        }
-        
-        .orchestrator-subtitle {
-            font-size: 11px;
-            color: #888;
-        }
-        
-        .kb-section {
-            background: rgba(76, 175, 80, 0.15);
-            border: 2px solid rgba(76, 175, 80, 0.5);
-            border-radius: 8px;
-            padding: 20px;
-            text-align: center;
-        }
-        
-        .kb-title {
-            font-size: 14px;
-            font-weight: bold;
-            color: #4caf50;
-            margin-bottom: 8px;
-        }
-        
-        .kb-subtitle {
-            font-size: 11px;
-            color: #888;
-            margin-bottom: 12px;
-        }
-        
-        .kb-bar {
-            width: 100%;
-            height: 8px;
-            background: rgba(100, 200, 255, 0.1);
-            border-radius: 4px;
-            overflow: hidden;
-            margin-bottom: 8px;
-        }
-        
-        .kb-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #64c8ff, #4caf50);
-            width: 42%;
-            transition: width 2s ease;
-        }
-        
-        .kb-capacity {
-            font-size: 10px;
-            color: #888;
-        }
-        
-        .project-item {
-            background: rgba(30, 60, 120, 0.3);
-            border-left: 3px solid #64c8ff;
-            padding: 12px;
-            margin-bottom: 10px;
-            border-radius: 4px;
-        }
-        
-        .project-header {
+        .metric-row {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 8px;
-        }
-        
-        .project-name {
-            font-weight: bold;
-            color: #e0e0e0;
-        }
-        
-        .project-meta {
-            font-size: 11px;
-            color: #888;
-        }
-        
-        .project-status {
-            font-size: 11px;
-            color: #64c8ff;
-        }
-        
-        .progress-bar {
-            width: 100%;
-            height: 4px;
-            background: rgba(100, 200, 255, 0.2);
-            border-radius: 2px;
-            overflow: hidden;
             margin-bottom: 6px;
         }
         
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #64c8ff, #4a9fff);
+        .metric-label {
+            color: #888;
         }
         
-        .progress-text {
-            font-size: 10px;
-            color: #666;
-        }
-        
-        .decision-item {
-            padding: 12px;
-            border-bottom: 1px solid rgba(100, 200, 255, 0.1);
-        }
-        
-        .decision-item:last-child {
-            border-bottom: none;
-        }
-        
-        .decision-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 4px;
-        }
-        
-        .decision-agent {
+        .metric-value {
+            color: #64c8ff;
             font-weight: bold;
+        }
+        
+        .info-panel {
+            background: rgba(20, 40, 80, 0.4);
+            border: 1px solid rgba(100, 200, 255, 0.2);
+            border-radius: 6px;
+            padding: 12px;
+            margin-top: 15px;
+            display: none;
+        }
+        
+        .info-panel.active {
+            display: block;
+        }
+        
+        .info-panel h3 {
             color: #64c8ff;
             font-size: 12px;
+            margin-bottom: 8px;
         }
         
-        .decision-time {
-            font-size: 11px;
-            color: #666;
+        .info-panel p {
+            font-size: 10px;
+            color: #aaa;
+            line-height: 1.4;
+            margin-bottom: 6px;
         }
         
-        .decision-content {
-            font-size: 13px;
-            color: #ddd;
-            margin-bottom: 4px;
+        /* Scrollbar */
+        #sidebar::-webkit-scrollbar {
+            width: 6px;
         }
         
-        .decision-project {
-            font-size: 11px;
-            color: #666;
+        #sidebar::-webkit-scrollbar-track {
+            background: rgba(100, 200, 255, 0.05);
         }
         
-        .decisions-container {
-            background: rgba(20, 40, 80, 0.4);
-            border-radius: 8px;
-            border: 1px solid rgba(100, 200, 255, 0.2);
+        #sidebar::-webkit-scrollbar-thumb {
+            background: rgba(100, 200, 255, 0.3);
+            border-radius: 3px;
         }
         
-        .footer {
-            margin-top: 40px;
-            padding: 15px;
-            background: rgba(20, 40, 80, 0.3);
-            border-radius: 8px;
-            text-align: center;
-            font-size: 11px;
-            color: #666;
-        }
-        
-        .footer div {
-            margin-bottom: 5px;
-        }
-        
-        .live-indicator {
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            background: #4caf50;
-            border-radius: 50%;
-            margin-right: 5px;
-            animation: pulse 2s infinite;
-        }
-        
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+        #sidebar::-webkit-scrollbar-thumb:hover {
+            background: rgba(100, 200, 255, 0.5);
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Header -->
-        <div class="header">
-            <div class="header-content">
-                <div>
-                    <h1>⚡ TAMIRCLAW CONTROL CENTER</h1>
-                    <p>Distributed Intelligence Operating System for TMD</p>
-                </div>
-                <div class="status-badge">
-                    <div><span class="live-indicator"></span>LIVE</div>
-                    <div class="sub">Status: Operational</div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Metrics -->
-        <div class="metrics-grid">
-            <div class="metric">
-                <div class="metric-value">3</div>
-                <div class="metric-label">ACTIVE PROJECTS</div>
-            </div>
-            <div class="metric">
-                <div class="metric-value">35</div>
-                <div class="metric-label">AGENTS ONLINE</div>
-            </div>
-            <div class="metric">
-                <div class="metric-value">8.4</div>
-                <div class="metric-label">AVG QUALITY SCORE</div>
-            </div>
-            <div class="metric">
-                <div class="metric-value">42%</div>
-                <div class="metric-label">KB CAPACITY</div>
-            </div>
-        </div>
-        
-        <!-- Architecture -->
-        <div class="section">
-            <div class="section-title">⚙️ SYSTEM ARCHITECTURE</div>
-            
-            <!-- Layer 1 -->
-            <div class="layer-section">
-                <div class="layer-title">Layer 1: Infrastructure Agents (12)</div>
-                <div class="agent-grid">
-                    <div class="agent-card active"><div class="agent-name">Email</div><div class="agent-status">✓ Active</div></div>
-                    <div class="agent-card active"><div class="agent-name">Invoice</div><div class="agent-status">✓ Active</div></div>
-                    <div class="agent-card active"><div class="agent-name">Quotes</div><div class="agent-status">✓ Active</div></div>
-                    <div class="agent-card active"><div class="agent-name">Projects</div><div class="agent-status">✓ Active</div></div>
-                    <div class="agent-card active"><div class="agent-name">Scheduler</div><div class="agent-status">✓ Active</div></div>
-                    <div class="agent-card active"><div class="agent-name">Documents</div><div class="agent-status">✓ Active</div></div>
-                    <div class="agent-card"><div class="agent-name">Accounting</div><div class="agent-status">Idle</div></div>
-                    <div class="agent-card"><div class="agent-name">CRM</div><div class="agent-status">Idle</div></div>
-                    <div class="agent-card"><div class="agent-name">HR Ops</div><div class="agent-status">Idle</div></div>
-                    <div class="agent-card"><div class="agent-name">Vendors</div><div class="agent-status">Idle</div></div>
-                    <div class="agent-card"><div class="agent-name">Legal/IP</div><div class="agent-status">Idle</div></div>
-                    <div class="agent-card"><div class="agent-name">Compliance</div><div class="agent-status">Idle</div></div>
-                </div>
-            </div>
-            
-            <!-- Orchestrator -->
-            <div class="orchestrator">
-                <div class="orchestrator-title">🧠 ORCHESTRATOR (Router + Coordinator)</div>
-                <div class="orchestrator-subtitle">Priority Queue • Context Manager • Conflict Detector • Quality Gates</div>
-            </div>
-            
-            <!-- Layer 2 -->
-            <div class="layer-section">
-                <div class="layer-title">Layer 2: Domain Specialists (7)</div>
-                <div class="agent-grid">
-                    <div class="agent-card active"><div class="agent-name">Vehicle</div><div class="agent-status">Specialist</div></div>
-                    <div class="agent-card active"><div class="agent-name">Aircraft</div><div class="agent-status">Specialist</div></div>
-                    <div class="agent-card active"><div class="agent-name">Marine</div><div class="agent-status">Specialist</div></div>
-                    <div class="agent-card"><div class="agent-name">Autonomous</div><div class="agent-status">Specialist</div></div>
-                    <div class="agent-card"><div class="agent-name">Transit</div><div class="agent-status">Specialist</div></div>
-                    <div class="agent-card"><div class="agent-name">Architecture</div><div class="agent-status">Specialist</div></div>
-                    <div class="agent-card"><div class="agent-name">Industrial</div><div class="agent-status">Specialist</div></div>
-                </div>
-            </div>
-            
-            <!-- Layer 3 -->
-            <div class="layer-section">
-                <div class="layer-title">Layer 3: Execution Experts (13)</div>
-                <div class="agent-grid">
-                    <div class="agent-card active"><div class="agent-name">Mechanical</div><div class="agent-status">Engineer</div></div>
-                    <div class="agent-card active"><div class="agent-name">Structural</div><div class="agent-status">Engineer</div></div>
-                    <div class="agent-card active"><div class="agent-name">Thermal</div><div class="agent-status">Engineer</div></div>
-                    <div class="agent-card active"><div class="agent-name">Aero</div><div class="agent-status">Engineer</div></div>
-                    <div class="agent-card active"><div class="agent-name">Hydro</div><div class="agent-status">Engineer</div></div>
-                    <div class="agent-card active"><div class="agent-name">Materials</div><div class="agent-status">Engineer</div></div>
-                    <div class="agent-card active"><div class="agent-name">Composites</div><div class="agent-status">Engineer</div></div>
-                    <div class="agent-card active"><div class="agent-name">DFM</div><div class="agent-status">Engineer</div></div>
-                    <div class="agent-card"><div class="agent-name">Design</div><div class="agent-status">Engineer</div></div>
-                    <div class="agent-card"><div class="agent-name">UX/UI</div><div class="agent-status">Engineer</div></div>
-                    <div class="agent-card"><div class="agent-name">CMF</div><div class="agent-status">Engineer</div></div>
-                    <div class="agent-card"><div class="agent-name">Systems</div><div class="agent-status">Engineer</div></div>
-                    <div class="agent-card"><div class="agent-name">Software</div><div class="agent-status">Engineer</div></div>
-                </div>
-            </div>
-            
-            <!-- Knowledge Base -->
-            <div class="kb-section">
-                <div class="kb-title">📚 SHARED KNOWLEDGE BASE</div>
-                <div class="kb-subtitle">Projects • Patterns • Specs • Vendors • Market Data • Regulations • Lessons</div>
-                <div class="kb-bar">
-                    <div class="kb-fill"></div>
-                </div>
-                <div class="kb-capacity">Growing with every project (42% capacity)</div>
-            </div>
-        </div>
-        
-        <!-- Active Projects -->
-        <div class="section">
-            <div class="section-title">📊 ACTIVE PROJECTS</div>
-            
-            <div class="project-item">
-                <div class="project-header">
-                    <div><span class="project-name">Audi Interior</span> <span class="project-meta">(Automotive)</span></div>
-                    <span class="project-status">Design Phase</span>
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill" style="width: 65%"></div>
-                </div>
-                <div class="progress-text">65% Complete</div>
-            </div>
-            
-            <div class="project-item">
-                <div class="project-header">
-                    <div><span class="project-name">eVTOL Cockpit</span> <span class="project-meta">(Aircraft)</span></div>
-                    <span class="project-status">Engineering Phase</span>
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill" style="width: 45%"></div>
-                </div>
-                <div class="progress-text">45% Complete</div>
-            </div>
-            
-            <div class="project-item">
-                <div class="project-header">
-                    <div><span class="project-name">Marine Vessel</span> <span class="project-meta">(Marine)</span></div>
-                    <span class="project-status">Planning Phase</span>
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill" style="width: 30%"></div>
-                </div>
-                <div class="progress-text">30% Complete</div>
-            </div>
-        </div>
-        
-        <!-- Recent Decisions -->
-        <div class="section">
-            <div class="section-title">✓ RECENT DECISIONS</div>
-            
-            <div class="decisions-container">
-                <div class="decision-item">
-                    <div class="decision-header">
-                        <span class="decision-agent">Material Engineer</span>
-                        <span class="decision-time">2 min ago</span>
+    <div id="container">
+        <div id="sidebar">
+            <div class="sidebar-section">
+                <div class="sidebar-title">Status</div>
+                <div class="metrics">
+                    <div class="metric-row">
+                        <span class="metric-label">Projects:</span>
+                        <span class="metric-value" id="metric-projects">3</span>
                     </div>
-                    <div class="decision-content">→ Use Aluminum 7075-T6 for structural frame</div>
-                    <div class="decision-project">Project: Audi Interior</div>
-                </div>
-                
-                <div class="decision-item">
-                    <div class="decision-header">
-                        <span class="decision-agent">DFM Agent</span>
-                        <span class="decision-time">15 min ago</span>
+                    <div class="metric-row">
+                        <span class="metric-label">Agents Online:</span>
+                        <span class="metric-value" id="metric-agents">35</span>
                     </div>
-                    <div class="decision-content">→ CNC machining approved for precision components</div>
-                    <div class="decision-project">Project: eVTOL Cockpit</div>
-                </div>
-                
-                <div class="decision-item">
-                    <div class="decision-header">
-                        <span class="decision-agent">Vehicle Specialist</span>
-                        <span class="decision-time">1 hour ago</span>
+                    <div class="metric-row">
+                        <span class="metric-label">Quality Score:</span>
+                        <span class="metric-value" id="metric-quality">8.4</span>
                     </div>
-                    <div class="decision-content">→ Market analysis complete: targeting premium segment</div>
-                    <div class="decision-project">Project: Marine Vessel</div>
+                    <div class="metric-row">
+                        <span class="metric-label">KB Capacity:</span>
+                        <span class="metric-value" id="metric-kb">42%</span>
+                    </div>
                 </div>
+            </div>
+            
+            <div class="sidebar-section">
+                <div class="sidebar-title">Components</div>
+                <div class="legend-item" onclick="filterLayer('infrastructure')">
+                    <div class="legend-color layer-infrastructure"></div>
+                    <span>Infrastructure (12)</span>
+                </div>
+                <div class="legend-item" onclick="filterLayer('specialists')">
+                    <div class="legend-color layer-specialists"></div>
+                    <span>Domain Specialists (7)</span>
+                </div>
+                <div class="legend-item" onclick="filterLayer('execution')">
+                    <div class="legend-color layer-execution"></div>
+                    <span>Execution Experts (13)</span>
+                </div>
+                <div class="legend-item" onclick="filterLayer('orchestrator')">
+                    <div class="legend-color layer-orchestrator"></div>
+                    <span>Orchestrator (1)</span>
+                </div>
+                <div class="legend-item" onclick="filterLayer('kb')">
+                    <div class="legend-color layer-kb"></div>
+                    <span>Knowledge Base (1)</span>
+                </div>
+            </div>
+            
+            <div class="sidebar-section">
+                <div class="sidebar-title">Active Projects</div>
+                <div class="legend-item">
+                    <span style="font-size: 10px;">🚗 Audi Interior</span>
+                </div>
+                <div class="legend-item">
+                    <span style="font-size: 10px;">✈️ eVTOL Cockpit</span>
+                </div>
+                <div class="legend-item">
+                    <span style="font-size: 10px;">⛴️ Marine Vessel</span>
+                </div>
+            </div>
+            
+            <div class="info-panel" id="infoPanel">
+                <h3 id="infoPanelTitle">Agent Name</h3>
+                <p id="infoPanelType">Type</p>
+                <p id="infoPanelDesc">Description</p>
             </div>
         </div>
         
-        <!-- Footer -->
-        <div class="footer">
-            <div>TamirClaw v2.0 • Operational Since 2026-03-24 • All Systems Green ✓</div>
-            <div>Next Update: Real-time • Data Refresh: Every 3 seconds</div>
+        <div id="main">
+            <div id="header">
+                <h1>⚡ TAMIRCLAW CONTROL CENTER</h1>
+                <p>Distributed Intelligence Operating System for TMD</p>
+            </div>
+            <div id="graph"></div>
         </div>
     </div>
+    
+    <script>
+        // Data structure
+        const data = {
+            nodes: [
+                // Infrastructure Layer
+                { id: 'email', label: 'Email Manager', layer: 'infrastructure', type: 'Infrastructure', desc: 'Inbox triage & routing' },
+                { id: 'invoice', label: 'Invoice Agent', layer: 'infrastructure', type: 'Infrastructure', desc: 'Billing & expenses' },
+                { id: 'quotes', label: 'Quote Generator', layer: 'infrastructure', type: 'Infrastructure', desc: 'Proposal generation' },
+                { id: 'pm', label: 'Project Tracker', layer: 'infrastructure', type: 'Infrastructure', desc: 'Timeline & milestones' },
+                { id: 'scheduler', label: 'Scheduler', layer: 'infrastructure', type: 'Infrastructure', desc: 'Calendar management' },
+                { id: 'docs', label: 'Document Manager', layer: 'infrastructure', type: 'Infrastructure', desc: 'File organization' },
+                { id: 'accounting', label: 'Accounting', layer: 'infrastructure', type: 'Infrastructure', desc: 'Financial tracking' },
+                { id: 'crm', label: 'CRM Agent', layer: 'infrastructure', type: 'Infrastructure', desc: 'Client relationships' },
+                { id: 'hr', label: 'HR Operations', layer: 'infrastructure', type: 'Infrastructure', desc: 'Team management' },
+                { id: 'vendor', label: 'Vendor Manager', layer: 'infrastructure', type: 'Infrastructure', desc: 'Supplier management' },
+                { id: 'legal', label: 'Legal/IP Tracker', layer: 'infrastructure', type: 'Infrastructure', desc: 'Contract & IP' },
+                { id: 'compliance', label: 'Compliance', layer: 'infrastructure', type: 'Infrastructure', desc: 'Regulatory tracking' },
+                
+                // Domain Specialists
+                { id: 'vehicle', label: 'Vehicle Specialist', layer: 'specialists', type: 'Domain Specialist', desc: 'Automotive expertise' },
+                { id: 'aircraft', label: 'Aircraft Specialist', layer: 'specialists', type: 'Domain Specialist', desc: 'Aerospace knowledge' },
+                { id: 'marine', label: 'Marine Specialist', layer: 'specialists', type: 'Domain Specialist', desc: 'Marine systems' },
+                { id: 'autonomous', label: 'Autonomous Specialist', layer: 'specialists', type: 'Domain Specialist', desc: 'Self-driving tech' },
+                { id: 'transit', label: 'Transit Specialist', layer: 'specialists', type: 'Domain Specialist', desc: 'Public transport' },
+                { id: 'arch', label: 'Architecture Specialist', layer: 'specialists', type: 'Domain Specialist', desc: 'Building design' },
+                { id: 'industrial', label: 'Industrial Specialist', layer: 'specialists', type: 'Domain Specialist', desc: 'Industrial products' },
+                
+                // Execution Experts
+                { id: 'mech', label: 'Mechanical Engineer', layer: 'execution', type: 'Execution Expert', desc: 'Mechanical design' },
+                { id: 'struct', label: 'Structural Engineer', layer: 'execution', type: 'Execution Expert', desc: 'Structural analysis' },
+                { id: 'thermal', label: 'Thermal Engineer', layer: 'execution', type: 'Execution Expert', desc: 'Thermal management' },
+                { id: 'aero', label: 'Aerodynamic Specialist', layer: 'execution', type: 'Execution Expert', desc: 'CFD & aerodynamics' },
+                { id: 'hydro', label: 'Hydrodynamic Specialist', layer: 'execution', type: 'Execution Expert', desc: 'Fluid dynamics' },
+                { id: 'materials', label: 'Material Engineer', layer: 'execution', type: 'Execution Expert', desc: 'Material selection' },
+                { id: 'composites', label: 'Composites Specialist', layer: 'execution', type: 'Execution Expert', desc: 'Advanced materials' },
+                { id: 'dfm', label: 'DFM Specialist', layer: 'execution', type: 'Execution Expert', desc: 'Manufacturing design' },
+                { id: 'design', label: 'Design Expert', layer: 'execution', type: 'Execution Expert', desc: 'Product design' },
+                { id: 'uxui', label: 'UX/UI Designer', layer: 'execution', type: 'Execution Expert', desc: 'User experience' },
+                { id: 'cmf', label: 'CMF Designer', layer: 'execution', type: 'Execution Expert', desc: 'Color, material, finish' },
+                { id: 'systems', label: 'Systems Engineer', layer: 'execution', type: 'Execution Expert', desc: 'System integration' },
+                { id: 'software', label: 'Software Engineer', layer: 'execution', type: 'Execution Expert', desc: 'Control software' },
+                
+                // Core
+                { id: 'orchestrator', label: 'Orchestrator', layer: 'orchestrator', type: 'Core', desc: 'Router & coordinator' },
+                { id: 'kb', label: 'Knowledge Base', layer: 'kb', type: 'Core', desc: 'Institutional memory' },
+            ],
+            links: [
+                // Infrastructure → Orchestrator
+                { source: 'email', target: 'orchestrator' },
+                { source: 'invoice', target: 'orchestrator' },
+                { source: 'quotes', target: 'orchestrator' },
+                { source: 'pm', target: 'orchestrator' },
+                { source: 'scheduler', target: 'orchestrator' },
+                { source: 'docs', target: 'orchestrator' },
+                
+                // Specialists → Orchestrator
+                { source: 'vehicle', target: 'orchestrator' },
+                { source: 'aircraft', target: 'orchestrator' },
+                { source: 'marine', target: 'orchestrator' },
+                { source: 'autonomous', target: 'orchestrator' },
+                { source: 'transit', target: 'orchestrator' },
+                
+                // Execution → Orchestrator
+                { source: 'mech', target: 'orchestrator' },
+                { source: 'struct', target: 'orchestrator' },
+                { source: 'aero', target: 'orchestrator' },
+                { source: 'thermal', target: 'orchestrator' },
+                { source: 'dfm', target: 'orchestrator' },
+                { source: 'design', target: 'orchestrator' },
+                
+                // KB connections
+                { source: 'orchestrator', target: 'kb' },
+                { source: 'vehicle', target: 'kb' },
+                { source: 'aircraft', target: 'kb' },
+                { source: 'mech', target: 'kb' },
+                { source: 'dfm', target: 'kb' },
+            ]
+        };
+        
+        // D3 Setup
+        const margin = { top: 20, right: 20, bottom: 20, left: 20 };
+        const width = document.getElementById('graph').offsetWidth - margin.left - margin.right;
+        const height = document.getElementById('graph').offsetHeight - margin.top - margin.bottom;
+        
+        const svg = d3.select('#graph')
+            .append('svg')
+            .attr('viewBox', [0, 0, width + margin.left + margin.right, height + margin.top + margin.bottom])
+            .style('background', '#0a0e27');
+        
+        const g = svg.append('g')
+            .attr('transform', `translate(${margin.left},${margin.top})`);
+        
+        // Force simulation
+        const simulation = d3.forceSimulation(data.nodes)
+            .force('link', d3.forceLink(data.links).id(d => d.id).distance(100))
+            .force('charge', d3.forceManyBody().strength(-500))
+            .force('center', d3.forceCenter(width / 2, height / 2))
+            .force('collision', d3.forceCollide().radius(30));
+        
+        // Links
+        const link = g.append('g')
+            .selectAll('line')
+            .data(data.links)
+            .enter()
+            .append('line')
+            .attr('class', 'link')
+            .attr('marker-end', 'url(#arrowhead)');
+        
+        // Nodes
+        const node = g.append('g')
+            .selectAll('circle')
+            .data(data.nodes)
+            .enter()
+            .append('circle')
+            .attr('class', d => `node layer-${d.layer}`)
+            .attr('r', d => d.layer === 'orchestrator' ? 20 : d.layer === 'kb' ? 18 : 14)
+            .call(drag(simulation))
+            .on('click', (event, d) => showInfo(d));
+        
+        // Labels
+        const labels = g.append('g')
+            .selectAll('text')
+            .data(data.nodes)
+            .enter()
+            .append('text')
+            .attr('class', d => `node-label ${d.layer === 'orchestrator' ? '' : 'small'}`)
+            .text(d => d.label)
+            .call(drag(simulation));
+        
+        // Drag behavior
+        function drag(simulation) {
+            function dragstarted(event, d) {
+                if (!event.active) simulation.alphaTarget(0.3).restart();
+                d.fx = d.x;
+                d.fy = d.y;
+            }
+            
+            function dragged(event, d) {
+                d.fx = event.x;
+                d.fy = event.y;
+            }
+            
+            function dragended(event, d) {
+                if (!event.active) simulation.alphaTarget(0);
+                d.fx = null;
+                d.fy = null;
+            }
+            
+            return d3.drag()
+                .on('start', dragstarted)
+                .on('drag', dragged)
+                .on('end', dragended);
+        }
+        
+        // Update positions on tick
+        simulation.on('tick', () => {
+            link
+                .attr('x1', d => d.source.x)
+                .attr('y1', d => d.source.y)
+                .attr('x2', d => d.target.x)
+                .attr('y2', d => d.target.y);
+            
+            node
+                .attr('cx', d => d.x)
+                .attr('cy', d => d.y);
+            
+            labels
+                .attr('x', d => d.x)
+                .attr('y', d => d.y + 4);
+        });
+        
+        // Info panel
+        function showInfo(d) {
+            document.getElementById('infoPanelTitle').textContent = d.label;
+            document.getElementById('infoPanelType').textContent = `📋 ${d.type}`;
+            document.getElementById('infoPanelDesc').textContent = d.desc;
+            document.getElementById('infoPanel').classList.add('active');
+            
+            node.classed('active', n => n.id === d.id);
+            link.classed('active', l => l.source.id === d.id || l.target.id === d.id);
+        }
+        
+        // Filter by layer
+        function filterLayer(layer) {
+            node.style('opacity', d => d.layer === layer ? 1 : 0.2);
+            link.style('opacity', d => d.source.layer === layer || d.target.layer === layer ? 1 : 0.1);
+            labels.style('opacity', d => d.layer === layer ? 1 : 0.2);
+        }
+        
+        // Reset view
+        window.addEventListener('keydown', e => {
+            if (e.key === 'Escape') {
+                node.classed('active', false);
+                link.classed('active', false);
+                node.style('opacity', 1);
+                link.style('opacity', 1);
+                labels.style('opacity', 1);
+                document.getElementById('infoPanel').classList.remove('active');
+            }
+        });
+    </script>
 </body>
 </html>
