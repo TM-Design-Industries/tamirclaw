@@ -1,0 +1,33 @@
+{
+  "name": "Orchestrator Agent",
+  "purpose": "Route work, manage priority queue, coordinate agents, detect conflicts",
+  "layer": "core",
+  "version": "1.0",
+  "inputs": {
+    "type": "object",
+    "required": ["action", "data"],
+    "properties": {
+      "action": {
+        "type": "string",
+        "enum": ["intake_project", "assign_agents", "check_status", "escalate"],
+        "description": "What action to perform"
+      },
+      "data": {
+        "type": "object",
+        "description": "Work data to process"
+      }
+    }
+  },
+  "outputs": {
+    "type": "object",
+    "properties": {
+      "success": {"type": "boolean"},
+      "project_id": {"type": "string"},
+      "assigned_agents": {"type": "array"},
+      "next_action": {"type": "string"},
+      "escalation_needed": {"type": "boolean"}
+    }
+  },
+  "decision_level": 3,
+  "decision_scope": "Cross-agent coordination, routing, priority management"
+}
