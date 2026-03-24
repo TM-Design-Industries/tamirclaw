@@ -1,0 +1,41 @@
+{
+  "name": "mvp-testing",
+  "version": "2.0.0",
+  "description": "2-week rapid MVP viability testing framework - GO or KILL fast",
+  "type": "testing-framework",
+  "inputs": {
+    "action": {
+      "type": "string",
+      "enum": ["start_sprint", "daily_standup", "get_mvp_results", "make_decision"]
+    },
+    "venture_idea": {
+      "type": "object",
+      "properties": {
+        "name": {"type": "string"},
+        "problem_statement": {"type": "string"},
+        "target_users": {"type": "string"},
+        "estimated_effort": {"type": "string", "enum": ["easy", "medium", "hard"]}
+      }
+    },
+    "sprint_day": {"type": "number"},
+    "progress_update": {
+      "type": "object",
+      "properties": {
+        "what_was_done": {"type": "string"},
+        "blockers": {"type": "array"},
+        "customer_feedback": {"type": "string"},
+        "morale": {"type": "number", "min": 1, "max": 10}
+      }
+    }
+  },
+  "outputs": {
+    "decision": {
+      "type": "object",
+      "properties": {
+        "go_or_kill": {"type": "string", "enum": ["GO", "KILL"]},
+        "rationale": {"type": "string"},
+        "confidence": {"type": "number"}
+      }
+    }
+  }
+}
