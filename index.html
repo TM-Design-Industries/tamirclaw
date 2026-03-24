@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TAMIRCLAW Control Center</title>
+    <title>TAMIRCLAW — System Architecture Dashboard</title>
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
         * {
@@ -13,24 +13,26 @@
         }
         
         body {
-            background: #0a0e27;
-            color: #e0e0e0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #ffffff;
+            color: #1a1a1a;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
             overflow: hidden;
         }
         
         #container {
             display: flex;
             height: 100vh;
+            gap: 0;
         }
         
+        /* LEFT SIDEBAR - ARCHITECTURE OVERVIEW */
         #sidebar {
-            width: 280px;
-            background: rgba(15, 23, 40, 0.95);
-            border-right: 1px solid rgba(100, 200, 255, 0.2);
-            padding: 20px;
+            width: 380px;
+            background: #f8f8f8;
+            border-right: 1px solid #e0e0e0;
+            padding: 25px;
             overflow-y: auto;
-            box-shadow: -2px 0 10px rgba(0, 0, 0, 0.3);
+            box-shadow: 2px 0 8px rgba(0,0,0,0.05);
         }
         
         #main {
@@ -40,26 +42,28 @@
         }
         
         #header {
-            background: linear-gradient(135deg, #0f1728 0%, #1a2a4a 100%);
-            border-bottom: 2px solid rgba(100, 200, 255, 0.3);
-            padding: 15px 20px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            background: #ffffff;
+            border-bottom: 2px solid #000000;
+            padding: 20px 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
         }
         
         #header h1 {
-            font-size: 24px;
-            color: #64c8ff;
-            margin-bottom: 3px;
+            font-size: 22px;
+            font-weight: 700;
+            color: #000;
+            margin-bottom: 4px;
         }
         
         #header p {
-            font-size: 11px;
-            color: #888;
+            font-size: 12px;
+            color: #666;
+            letter-spacing: 0.5px;
         }
         
-        #graph {
+        #graph-container {
             flex: 1;
-            background: #0a0e27;
+            background: #ffffff;
             position: relative;
             overflow: hidden;
         }
@@ -69,118 +73,155 @@
             height: 100%;
         }
         
-        .node {
-            cursor: pointer;
-            stroke: rgba(100, 200, 255, 0.4);
-            stroke-width: 2px;
-        }
-        
-        .node:hover {
-            stroke: #64c8ff;
-            stroke-width: 3px;
-            filter: drop-shadow(0 0 10px rgba(100, 200, 255, 0.6));
-        }
-        
-        .node.active {
-            stroke: #64c8ff;
-            stroke-width: 3px;
-            filter: drop-shadow(0 0 15px rgba(100, 200, 255, 0.8));
-        }
-        
-        .link {
-            stroke: rgba(100, 200, 255, 0.15);
-            stroke-width: 1.5px;
-        }
-        
-        .link.active {
-            stroke: rgba(100, 200, 255, 0.6);
-            stroke-width: 2.5px;
-        }
-        
-        .node-label {
+        /* TYPOGRAPHY */
+        .sidebar-title {
             font-size: 11px;
-            font-weight: bold;
-            text-anchor: middle;
-            pointer-events: none;
-            fill: #e0e0e0;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #000;
+            margin-bottom: 12px;
+            margin-top: 20px;
+            letter-spacing: 1px;
         }
         
-        .node-label.small {
-            font-size: 9px;
+        .sidebar-title:first-child {
+            margin-top: 0;
         }
         
-        /* Layer Colors */
-        .layer-infrastructure { fill: #ff6b6b; }
-        .layer-specialists { fill: #4ecdc4; }
-        .layer-execution { fill: #45b7d1; }
-        .layer-orchestrator { fill: #f9ca24; }
-        .layer-kb { fill: #6bcf7f; }
-        .layer-tamir { fill: #a29bfe; }
-        
-        /* Sidebar */
-        .sidebar-section {
+        /* METRICS */
+        .metrics {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
             margin-bottom: 20px;
         }
         
-        .sidebar-title {
-            font-size: 12px;
-            color: #64c8ff;
-            font-weight: bold;
-            margin-bottom: 10px;
+        .metric-box {
+            background: #ffffff;
+            border: 1px solid #e0e0e0;
+            padding: 12px;
+            text-align: center;
+            border-radius: 4px;
+        }
+        
+        .metric-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: #000;
+        }
+        
+        .metric-label {
+            font-size: 10px;
+            color: #888;
+            margin-top: 4px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
         
-        .legend-item {
+        /* LAYER SECTIONS */
+        .layer-section {
+            margin-bottom: 18px;
+        }
+        
+        .layer-header {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #000;
+            margin-bottom: 10px;
             display: flex;
             align-items: center;
-            margin-bottom: 8px;
-            font-size: 11px;
-            cursor: pointer;
-            padding: 6px;
+            gap: 8px;
+        }
+        
+        .layer-count {
+            font-size: 10px;
+            background: #000;
+            color: #fff;
+            padding: 2px 6px;
+            border-radius: 2px;
+            font-weight: 700;
+        }
+        
+        .component-list {
+            background: #ffffff;
+            border: 1px solid #e0e0e0;
             border-radius: 4px;
-            transition: background 0.2s;
+            max-height: 120px;
+            overflow-y: auto;
         }
         
-        .legend-item:hover {
-            background: rgba(100, 200, 255, 0.1);
-        }
-        
-        .legend-color {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            margin-right: 8px;
-        }
-        
-        .metrics {
-            background: rgba(20, 40, 80, 0.3);
-            border: 1px solid rgba(100, 200, 255, 0.2);
-            border-radius: 6px;
-            padding: 12px;
+        .component-item {
+            padding: 8px 10px;
+            border-bottom: 1px solid #f0f0f0;
             font-size: 11px;
-            margin-bottom: 15px;
-        }
-        
-        .metric-row {
+            color: #555;
             display: flex;
-            justify-content: space-between;
-            margin-bottom: 6px;
+            align-items: center;
+            gap: 8px;
         }
         
-        .metric-label {
-            color: #888;
+        .component-item:last-child {
+            border-bottom: none;
         }
         
-        .metric-value {
-            color: #64c8ff;
-            font-weight: bold;
+        .component-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
         }
         
+        /* COLORS FOR EACH LAYER */
+        .color-infrastructure { background: #E74C3C; }
+        .color-specialists { background: #3498DB; }
+        .color-execution { background: #2ECC71; }
+        .color-orchestrator { background: #F39C12; }
+        .color-kb { background: #9B59B6; }
+        .color-tamir { background: #1ABC9C; }
+        
+        /* NETWORK NODES */
+        .node {
+            cursor: pointer;
+            stroke: #333;
+            stroke-width: 1.5px;
+        }
+        
+        .node:hover {
+            stroke-width: 2.5px;
+            filter: drop-shadow(0 2px 6px rgba(0,0,0,0.2));
+        }
+        
+        .node.active {
+            stroke-width: 3px;
+            filter: drop-shadow(0 2px 8px rgba(0,0,0,0.3));
+        }
+        
+        .node-label {
+            font-size: 10px;
+            font-weight: 600;
+            text-anchor: middle;
+            pointer-events: none;
+            fill: #ffffff;
+        }
+        
+        .link {
+            stroke: #cccccc;
+            stroke-width: 1px;
+            opacity: 0.4;
+        }
+        
+        .link.active {
+            stroke: #333;
+            stroke-width: 2px;
+            opacity: 1;
+        }
+        
+        /* INFO PANEL */
         .info-panel {
-            background: rgba(20, 40, 80, 0.4);
-            border: 1px solid rgba(100, 200, 255, 0.2);
-            border-radius: 6px;
+            background: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
             padding: 12px;
             margin-top: 15px;
             display: none;
@@ -191,270 +232,348 @@
         }
         
         .info-panel h3 {
-            color: #64c8ff;
             font-size: 12px;
-            margin-bottom: 8px;
+            font-weight: 700;
+            color: #000;
+            margin-bottom: 6px;
         }
         
         .info-panel p {
             font-size: 10px;
-            color: #aaa;
-            line-height: 1.4;
-            margin-bottom: 6px;
+            color: #666;
+            line-height: 1.5;
+            margin-bottom: 4px;
         }
         
-        /* Scrollbar */
+        /* SCROLLBAR */
         #sidebar::-webkit-scrollbar {
             width: 6px;
         }
         
         #sidebar::-webkit-scrollbar-track {
-            background: rgba(100, 200, 255, 0.05);
+            background: #f0f0f0;
         }
         
         #sidebar::-webkit-scrollbar-thumb {
-            background: rgba(100, 200, 255, 0.3);
+            background: #ccc;
             border-radius: 3px;
         }
         
         #sidebar::-webkit-scrollbar-thumb:hover {
-            background: rgba(100, 200, 255, 0.5);
+            background: #999;
+        }
+        
+        .component-list::-webkit-scrollbar {
+            width: 4px;
+        }
+        
+        .component-list::-webkit-scrollbar-track {
+            background: #f5f5f5;
+        }
+        
+        .component-list::-webkit-scrollbar-thumb {
+            background: #ddd;
+            border-radius: 2px;
+        }
+        
+        /* ARCHITECTURE DIAGRAM */
+        .architecture-text {
+            font-size: 10px;
+            color: #888;
+            line-height: 1.6;
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+            font-family: 'Monaco', 'Courier New', monospace;
         }
     </style>
 </head>
 <body>
     <div id="container">
+        <!-- SIDEBAR -->
         <div id="sidebar">
-            <div class="sidebar-section">
-                <div class="sidebar-title">Status</div>
-                <div class="metrics">
-                    <div class="metric-row">
-                        <span class="metric-label">Projects:</span>
-                        <span class="metric-value" id="metric-projects">3</span>
-                    </div>
-                    <div class="metric-row">
-                        <span class="metric-label">Agents Online:</span>
-                        <span class="metric-value" id="metric-agents">35</span>
-                    </div>
-                    <div class="metric-row">
-                        <span class="metric-label">Quality Score:</span>
-                        <span class="metric-value" id="metric-quality">8.4</span>
-                    </div>
-                    <div class="metric-row">
-                        <span class="metric-label">KB Capacity:</span>
-                        <span class="metric-value" id="metric-kb">42%</span>
-                    </div>
+            <div class="sidebar-title">System Status</div>
+            <div class="metrics">
+                <div class="metric-box">
+                    <div class="metric-value">35</div>
+                    <div class="metric-label">Total Agents</div>
+                </div>
+                <div class="metric-box">
+                    <div class="metric-value">6</div>
+                    <div class="metric-label">Layers</div>
+                </div>
+                <div class="metric-box">
+                    <div class="metric-value">3</div>
+                    <div class="metric-label">Active Projects</div>
+                </div>
+                <div class="metric-box">
+                    <div class="metric-value">8.4</div>
+                    <div class="metric-label">Quality Score</div>
                 </div>
             </div>
             
-            <div class="sidebar-section">
-                <div class="sidebar-title">Components</div>
-                <div class="legend-item" onclick="filterLayer('infrastructure')">
-                    <div class="legend-color layer-infrastructure"></div>
-                    <span>Infrastructure (12)</span>
+            <!-- LAYER 1 -->
+            <div class="layer-section">
+                <div class="layer-header">
+                    <span class="component-dot color-infrastructure"></span>
+                    Layer 1: Infrastructure
+                    <span class="layer-count">12</span>
                 </div>
-                <div class="legend-item" onclick="filterLayer('specialists')">
-                    <div class="legend-color layer-specialists"></div>
-                    <span>Domain Specialists (7)</span>
-                </div>
-                <div class="legend-item" onclick="filterLayer('execution')">
-                    <div class="legend-color layer-execution"></div>
-                    <span>Execution Experts (13)</span>
-                </div>
-                <div class="legend-item" onclick="filterLayer('orchestrator')">
-                    <div class="legend-color layer-orchestrator"></div>
-                    <span>Orchestrator (1)</span>
-                </div>
-                <div class="legend-item" onclick="filterLayer('kb')">
-                    <div class="legend-color layer-kb"></div>
-                    <span>Knowledge Base (1)</span>
+                <div class="component-list">
+                    <div class="component-item"><span class="component-dot color-infrastructure"></span>Email Manager</div>
+                    <div class="component-item"><span class="component-dot color-infrastructure"></span>Invoice Agent</div>
+                    <div class="component-item"><span class="component-dot color-infrastructure"></span>Quote Generator</div>
+                    <div class="component-item"><span class="component-dot color-infrastructure"></span>Project Tracker</div>
+                    <div class="component-item"><span class="component-dot color-infrastructure"></span>Scheduler</div>
+                    <div class="component-item"><span class="component-dot color-infrastructure"></span>Document Manager</div>
+                    <div class="component-item"><span class="component-dot color-infrastructure"></span>Accounting</div>
+                    <div class="component-item"><span class="component-dot color-infrastructure"></span>CRM Agent</div>
+                    <div class="component-item"><span class="component-dot color-infrastructure"></span>HR Operations</div>
+                    <div class="component-item"><span class="component-dot color-infrastructure"></span>Vendor Manager</div>
+                    <div class="component-item"><span class="component-dot color-infrastructure"></span>Legal/IP Tracker</div>
+                    <div class="component-item"><span class="component-dot color-infrastructure"></span>Compliance</div>
                 </div>
             </div>
             
-            <div class="sidebar-section">
-                <div class="sidebar-title">Active Projects</div>
-                <div class="legend-item">
-                    <span style="font-size: 10px;">🚗 Audi Interior</span>
+            <!-- LAYER 2 -->
+            <div class="layer-section">
+                <div class="layer-header">
+                    <span class="component-dot color-specialists"></span>
+                    Layer 2: Domain Specialists
+                    <span class="layer-count">7</span>
                 </div>
-                <div class="legend-item">
-                    <span style="font-size: 10px;">✈️ eVTOL Cockpit</span>
+                <div class="component-list">
+                    <div class="component-item"><span class="component-dot color-specialists"></span>Vehicle Specialist</div>
+                    <div class="component-item"><span class="component-dot color-specialists"></span>Aircraft Specialist</div>
+                    <div class="component-item"><span class="component-dot color-specialists"></span>Marine Specialist</div>
+                    <div class="component-item"><span class="component-dot color-specialists"></span>Autonomous Transport</div>
+                    <div class="component-item"><span class="component-dot color-specialists"></span>Public Transit</div>
+                    <div class="component-item"><span class="component-dot color-specialists"></span>Architecture</div>
+                    <div class="component-item"><span class="component-dot color-specialists"></span>Industrial Products</div>
                 </div>
-                <div class="legend-item">
-                    <span style="font-size: 10px;">⛴️ Marine Vessel</span>
+            </div>
+            
+            <!-- LAYER 3 -->
+            <div class="layer-section">
+                <div class="layer-header">
+                    <span class="component-dot color-execution"></span>
+                    Layer 3: Execution Experts
+                    <span class="layer-count">13</span>
                 </div>
+                <div class="component-list">
+                    <div class="component-item"><span class="component-dot color-execution"></span>Mechanical Engineer</div>
+                    <div class="component-item"><span class="component-dot color-execution"></span>Structural Engineer</div>
+                    <div class="component-item"><span class="component-dot color-execution"></span>Thermal Engineer</div>
+                    <div class="component-item"><span class="component-dot color-execution"></span>Aerodynamic Specialist</div>
+                    <div class="component-item"><span class="component-dot color-execution"></span>Hydrodynamic Specialist</div>
+                    <div class="component-item"><span class="component-dot color-execution"></span>Material Scientist</div>
+                    <div class="component-item"><span class="component-dot color-execution"></span>Composites Specialist</div>
+                    <div class="component-item"><span class="component-dot color-execution"></span>DFM Specialist</div>
+                    <div class="component-item"><span class="component-dot color-execution"></span>Design Expert</div>
+                    <div class="component-item"><span class="component-dot color-execution"></span>UX/UI Designer</div>
+                    <div class="component-item"><span class="component-dot color-execution"></span>CMF Designer</div>
+                    <div class="component-item"><span class="component-dot color-execution"></span>Systems Engineer</div>
+                    <div class="component-item"><span class="component-dot color-execution"></span>Software Engineer</div>
+                </div>
+            </div>
+            
+            <!-- CORE SYSTEMS -->
+            <div class="layer-section">
+                <div class="layer-header">
+                    <span class="component-dot color-orchestrator"></span>
+                    Core: Orchestrator
+                </div>
+                <div class="architecture-text">Router • Coordinator • Priority Queue • Conflict Detector • Quality Gates</div>
+            </div>
+            
+            <div class="layer-section">
+                <div class="layer-header">
+                    <span class="component-dot color-kb"></span>
+                    Core: Knowledge Base
+                </div>
+                <div class="architecture-text">Projects • Patterns • Specs • Vendors • Market • Regulations • Lessons</div>
             </div>
             
             <div class="info-panel" id="infoPanel">
-                <h3 id="infoPanelTitle">Agent Name</h3>
+                <h3 id="infoPanelTitle">Component</h3>
                 <p id="infoPanelType">Type</p>
                 <p id="infoPanelDesc">Description</p>
             </div>
         </div>
         
+        <!-- MAIN GRAPH -->
         <div id="main">
             <div id="header">
-                <h1>⚡ TAMIRCLAW CONTROL CENTER</h1>
-                <p>Distributed Intelligence Operating System for TMD</p>
+                <h1>⚡ TAMIRCLAW SYSTEM ARCHITECTURE</h1>
+                <p>Distributed Intelligence Operating System | Interactive Network Visualization</p>
             </div>
-            <div id="graph"></div>
+            <div id="graph-container"></div>
         </div>
     </div>
     
     <script>
-        // Data structure
-        const data = {
+        // SYSTEM DATA
+        const architectureData = {
             nodes: [
                 // Infrastructure Layer
-                { id: 'email', label: 'Email Manager', layer: 'infrastructure', type: 'Infrastructure', desc: 'Inbox triage & routing' },
-                { id: 'invoice', label: 'Invoice Agent', layer: 'infrastructure', type: 'Infrastructure', desc: 'Billing & expenses' },
-                { id: 'quotes', label: 'Quote Generator', layer: 'infrastructure', type: 'Infrastructure', desc: 'Proposal generation' },
-                { id: 'pm', label: 'Project Tracker', layer: 'infrastructure', type: 'Infrastructure', desc: 'Timeline & milestones' },
-                { id: 'scheduler', label: 'Scheduler', layer: 'infrastructure', type: 'Infrastructure', desc: 'Calendar management' },
-                { id: 'docs', label: 'Document Manager', layer: 'infrastructure', type: 'Infrastructure', desc: 'File organization' },
-                { id: 'accounting', label: 'Accounting', layer: 'infrastructure', type: 'Infrastructure', desc: 'Financial tracking' },
-                { id: 'crm', label: 'CRM Agent', layer: 'infrastructure', type: 'Infrastructure', desc: 'Client relationships' },
-                { id: 'hr', label: 'HR Operations', layer: 'infrastructure', type: 'Infrastructure', desc: 'Team management' },
-                { id: 'vendor', label: 'Vendor Manager', layer: 'infrastructure', type: 'Infrastructure', desc: 'Supplier management' },
-                { id: 'legal', label: 'Legal/IP Tracker', layer: 'infrastructure', type: 'Infrastructure', desc: 'Contract & IP' },
-                { id: 'compliance', label: 'Compliance', layer: 'infrastructure', type: 'Infrastructure', desc: 'Regulatory tracking' },
+                { id: 'email', name: 'Email Manager', layer: 'infrastructure', color: '#E74C3C', type: 'Inbox triage, routing' },
+                { id: 'invoice', name: 'Invoice Agent', layer: 'infrastructure', color: '#E74C3C', type: 'Billing, expenses' },
+                { id: 'quotes', name: 'Quote Generator', layer: 'infrastructure', color: '#E74C3C', type: 'Proposal generation' },
+                { id: 'pm', name: 'Project Tracker', layer: 'infrastructure', color: '#E74C3C', type: 'Timeline, milestones' },
+                { id: 'scheduler', name: 'Scheduler', layer: 'infrastructure', color: '#E74C3C', type: 'Calendar management' },
+                { id: 'docs', name: 'Document Manager', layer: 'infrastructure', color: '#E74C3C', type: 'File organization' },
+                { id: 'accounting', name: 'Accounting', layer: 'infrastructure', color: '#E74C3C', type: 'Financial tracking' },
+                { id: 'crm', name: 'CRM Agent', layer: 'infrastructure', color: '#E74C3C', type: 'Client relationships' },
+                { id: 'hr', name: 'HR Operations', layer: 'infrastructure', color: '#E74C3C', type: 'Team management' },
+                { id: 'vendor', name: 'Vendor Manager', layer: 'infrastructure', color: '#E74C3C', type: 'Supplier management' },
+                { id: 'legal', name: 'Legal/IP Tracker', layer: 'infrastructure', color: '#E74C3C', type: 'Contract, IP' },
+                { id: 'compliance', name: 'Compliance', layer: 'infrastructure', color: '#E74C3C', type: 'Regulatory tracking' },
                 
                 // Domain Specialists
-                { id: 'vehicle', label: 'Vehicle Specialist', layer: 'specialists', type: 'Domain Specialist', desc: 'Automotive expertise' },
-                { id: 'aircraft', label: 'Aircraft Specialist', layer: 'specialists', type: 'Domain Specialist', desc: 'Aerospace knowledge' },
-                { id: 'marine', label: 'Marine Specialist', layer: 'specialists', type: 'Domain Specialist', desc: 'Marine systems' },
-                { id: 'autonomous', label: 'Autonomous Specialist', layer: 'specialists', type: 'Domain Specialist', desc: 'Self-driving tech' },
-                { id: 'transit', label: 'Transit Specialist', layer: 'specialists', type: 'Domain Specialist', desc: 'Public transport' },
-                { id: 'arch', label: 'Architecture Specialist', layer: 'specialists', type: 'Domain Specialist', desc: 'Building design' },
-                { id: 'industrial', label: 'Industrial Specialist', layer: 'specialists', type: 'Domain Specialist', desc: 'Industrial products' },
+                { id: 'vehicle', name: 'Vehicle Specialist', layer: 'specialists', color: '#3498DB', type: 'Automotive expertise' },
+                { id: 'aircraft', name: 'Aircraft Specialist', layer: 'specialists', color: '#3498DB', type: 'Aerospace knowledge' },
+                { id: 'marine', name: 'Marine Specialist', layer: 'specialists', color: '#3498DB', type: 'Marine systems' },
+                { id: 'autonomous', name: 'Autonomous Transport', layer: 'specialists', color: '#3498DB', type: 'Self-driving tech' },
+                { id: 'transit', name: 'Public Transit', layer: 'specialists', color: '#3498DB', type: 'Public transport' },
+                { id: 'arch', name: 'Architecture', layer: 'specialists', color: '#3498DB', type: 'Building design' },
+                { id: 'industrial', name: 'Industrial Products', layer: 'specialists', color: '#3498DB', type: 'Industrial goods' },
                 
                 // Execution Experts
-                { id: 'mech', label: 'Mechanical Engineer', layer: 'execution', type: 'Execution Expert', desc: 'Mechanical design' },
-                { id: 'struct', label: 'Structural Engineer', layer: 'execution', type: 'Execution Expert', desc: 'Structural analysis' },
-                { id: 'thermal', label: 'Thermal Engineer', layer: 'execution', type: 'Execution Expert', desc: 'Thermal management' },
-                { id: 'aero', label: 'Aerodynamic Specialist', layer: 'execution', type: 'Execution Expert', desc: 'CFD & aerodynamics' },
-                { id: 'hydro', label: 'Hydrodynamic Specialist', layer: 'execution', type: 'Execution Expert', desc: 'Fluid dynamics' },
-                { id: 'materials', label: 'Material Engineer', layer: 'execution', type: 'Execution Expert', desc: 'Material selection' },
-                { id: 'composites', label: 'Composites Specialist', layer: 'execution', type: 'Execution Expert', desc: 'Advanced materials' },
-                { id: 'dfm', label: 'DFM Specialist', layer: 'execution', type: 'Execution Expert', desc: 'Manufacturing design' },
-                { id: 'design', label: 'Design Expert', layer: 'execution', type: 'Execution Expert', desc: 'Product design' },
-                { id: 'uxui', label: 'UX/UI Designer', layer: 'execution', type: 'Execution Expert', desc: 'User experience' },
-                { id: 'cmf', label: 'CMF Designer', layer: 'execution', type: 'Execution Expert', desc: 'Color, material, finish' },
-                { id: 'systems', label: 'Systems Engineer', layer: 'execution', type: 'Execution Expert', desc: 'System integration' },
-                { id: 'software', label: 'Software Engineer', layer: 'execution', type: 'Execution Expert', desc: 'Control software' },
+                { id: 'mech', name: 'Mechanical Engineer', layer: 'execution', color: '#2ECC71', type: 'Mechanical design' },
+                { id: 'struct', name: 'Structural Engineer', layer: 'execution', color: '#2ECC71', type: 'Structural analysis' },
+                { id: 'thermal', name: 'Thermal Engineer', layer: 'execution', color: '#2ECC71', type: 'Thermal management' },
+                { id: 'aero', name: 'Aerodynamic Specialist', layer: 'execution', color: '#2ECC71', type: 'CFD, aerodynamics' },
+                { id: 'hydro', name: 'Hydrodynamic Specialist', layer: 'execution', color: '#2ECC71', type: 'Fluid dynamics' },
+                { id: 'materials', name: 'Material Scientist', layer: 'execution', color: '#2ECC71', type: 'Material selection' },
+                { id: 'composites', name: 'Composites Specialist', layer: 'execution', color: '#2ECC71', type: 'Advanced materials' },
+                { id: 'dfm', name: 'DFM Specialist', layer: 'execution', color: '#2ECC71', type: 'Manufacturing design' },
+                { id: 'design', name: 'Design Expert', layer: 'execution', color: '#2ECC71', type: 'Product design' },
+                { id: 'uxui', name: 'UX/UI Designer', layer: 'execution', color: '#2ECC71', type: 'User experience' },
+                { id: 'cmf', name: 'CMF Designer', layer: 'execution', color: '#2ECC71', type: 'Color, material, finish' },
+                { id: 'systems', name: 'Systems Engineer', layer: 'execution', color: '#2ECC71', type: 'System integration' },
+                { id: 'software', name: 'Software Engineer', layer: 'execution', color: '#2ECC71', type: 'Control software' },
                 
                 // Core
-                { id: 'orchestrator', label: 'Orchestrator', layer: 'orchestrator', type: 'Core', desc: 'Router & coordinator' },
-                { id: 'kb', label: 'Knowledge Base', layer: 'kb', type: 'Core', desc: 'Institutional memory' },
+                { id: 'orchestrator', name: 'ORCHESTRATOR', layer: 'orchestrator', color: '#F39C12', type: 'Router & Coordinator' },
+                { id: 'kb', name: 'KNOWLEDGE BASE', layer: 'kb', color: '#9B59B6', type: 'Institutional Memory' },
             ],
             links: [
-                // Infrastructure → Orchestrator
+                // Infrastructure to Orchestrator
                 { source: 'email', target: 'orchestrator' },
                 { source: 'invoice', target: 'orchestrator' },
                 { source: 'quotes', target: 'orchestrator' },
                 { source: 'pm', target: 'orchestrator' },
                 { source: 'scheduler', target: 'orchestrator' },
                 { source: 'docs', target: 'orchestrator' },
+                { source: 'accounting', target: 'orchestrator' },
+                { source: 'crm', target: 'orchestrator' },
                 
-                // Specialists → Orchestrator
+                // Specialists to Orchestrator
                 { source: 'vehicle', target: 'orchestrator' },
                 { source: 'aircraft', target: 'orchestrator' },
                 { source: 'marine', target: 'orchestrator' },
                 { source: 'autonomous', target: 'orchestrator' },
                 { source: 'transit', target: 'orchestrator' },
+                { source: 'arch', target: 'orchestrator' },
+                { source: 'industrial', target: 'orchestrator' },
                 
-                // Execution → Orchestrator
+                // Execution to Orchestrator
                 { source: 'mech', target: 'orchestrator' },
                 { source: 'struct', target: 'orchestrator' },
                 { source: 'aero', target: 'orchestrator' },
                 { source: 'thermal', target: 'orchestrator' },
                 { source: 'dfm', target: 'orchestrator' },
                 { source: 'design', target: 'orchestrator' },
+                { source: 'systems', target: 'orchestrator' },
                 
-                // KB connections
+                // Orchestrator to KB
                 { source: 'orchestrator', target: 'kb' },
+                
+                // Direct KB connections (key agents)
                 { source: 'vehicle', target: 'kb' },
                 { source: 'aircraft', target: 'kb' },
                 { source: 'mech', target: 'kb' },
                 { source: 'dfm', target: 'kb' },
+                { source: 'design', target: 'kb' },
             ]
         };
         
-        // D3 Setup
-        const margin = { top: 20, right: 20, bottom: 20, left: 20 };
-        const width = document.getElementById('graph').offsetWidth - margin.left - margin.right;
-        const height = document.getElementById('graph').offsetHeight - margin.top - margin.bottom;
+        // D3 SETUP
+        const container = document.getElementById('graph-container');
+        const width = container.offsetWidth;
+        const height = container.offsetHeight;
         
-        const svg = d3.select('#graph')
+        const svg = d3.select('#graph-container')
             .append('svg')
-            .attr('viewBox', [0, 0, width + margin.left + margin.right, height + margin.top + margin.bottom])
-            .style('background', '#0a0e27');
+            .attr('width', width)
+            .attr('height', height);
         
-        const g = svg.append('g')
-            .attr('transform', `translate(${margin.left},${margin.top})`);
+        const g = svg.append('g');
         
-        // Force simulation
-        const simulation = d3.forceSimulation(data.nodes)
-            .force('link', d3.forceLink(data.links).id(d => d.id).distance(100))
-            .force('charge', d3.forceManyBody().strength(-500))
+        // FORCE SIMULATION
+        const simulation = d3.forceSimulation(architectureData.nodes)
+            .force('link', d3.forceLink(architectureData.links).id(d => d.id).distance(120))
+            .force('charge', d3.forceManyBody().strength(-600))
             .force('center', d3.forceCenter(width / 2, height / 2))
-            .force('collision', d3.forceCollide().radius(30));
+            .force('collision', d3.forceCollide().radius(35));
         
-        // Links
+        // LINKS
         const link = g.append('g')
             .selectAll('line')
-            .data(data.links)
+            .data(architectureData.links)
             .enter()
             .append('line')
-            .attr('class', 'link')
-            .attr('marker-end', 'url(#arrowhead)');
+            .attr('class', 'link');
         
-        // Nodes
+        // NODES
         const node = g.append('g')
             .selectAll('circle')
-            .data(data.nodes)
+            .data(architectureData.nodes)
             .enter()
             .append('circle')
-            .attr('class', d => `node layer-${d.layer}`)
-            .attr('r', d => d.layer === 'orchestrator' ? 20 : d.layer === 'kb' ? 18 : 14)
+            .attr('class', 'node')
+            .attr('r', d => d.layer === 'orchestrator' ? 24 : d.layer === 'kb' ? 22 : 16)
+            .attr('fill', d => d.color)
             .call(drag(simulation))
             .on('click', (event, d) => showInfo(d));
         
-        // Labels
+        // LABELS
         const labels = g.append('g')
             .selectAll('text')
-            .data(data.nodes)
+            .data(architectureData.nodes)
             .enter()
             .append('text')
-            .attr('class', d => `node-label ${d.layer === 'orchestrator' ? '' : 'small'}`)
-            .text(d => d.label)
+            .attr('class', 'node-label')
+            .text(d => {
+                const names = d.name.split(' ');
+                return names.length > 2 ? names[0][0] + names[names.length - 1][0] : names[0][0];
+            })
             .call(drag(simulation));
         
-        // Drag behavior
+        // DRAG
         function drag(simulation) {
             function dragstarted(event, d) {
                 if (!event.active) simulation.alphaTarget(0.3).restart();
                 d.fx = d.x;
                 d.fy = d.y;
             }
-            
             function dragged(event, d) {
                 d.fx = event.x;
                 d.fy = event.y;
             }
-            
             function dragended(event, d) {
                 if (!event.active) simulation.alphaTarget(0);
                 d.fx = null;
                 d.fy = null;
             }
-            
             return d3.drag()
                 .on('start', dragstarted)
                 .on('drag', dragged)
                 .on('end', dragended);
         }
         
-        // Update positions on tick
+        // UPDATE
         simulation.on('tick', () => {
             link
                 .attr('x1', d => d.source.x)
@@ -471,32 +590,22 @@
                 .attr('y', d => d.y + 4);
         });
         
-        // Info panel
+        // INFO PANEL
         function showInfo(d) {
-            document.getElementById('infoPanelTitle').textContent = d.label;
-            document.getElementById('infoPanelType').textContent = `📋 ${d.type}`;
-            document.getElementById('infoPanelDesc').textContent = d.desc;
+            document.getElementById('infoPanelTitle').textContent = d.name;
+            document.getElementById('infoPanelType').textContent = `${d.layer.toUpperCase()} • ${d.type}`;
+            document.getElementById('infoPanelDesc').textContent = d.type;
             document.getElementById('infoPanel').classList.add('active');
             
             node.classed('active', n => n.id === d.id);
             link.classed('active', l => l.source.id === d.id || l.target.id === d.id);
         }
         
-        // Filter by layer
-        function filterLayer(layer) {
-            node.style('opacity', d => d.layer === layer ? 1 : 0.2);
-            link.style('opacity', d => d.source.layer === layer || d.target.layer === layer ? 1 : 0.1);
-            labels.style('opacity', d => d.layer === layer ? 1 : 0.2);
-        }
-        
-        // Reset view
+        // RESET
         window.addEventListener('keydown', e => {
             if (e.key === 'Escape') {
                 node.classed('active', false);
                 link.classed('active', false);
-                node.style('opacity', 1);
-                link.style('opacity', 1);
-                labels.style('opacity', 1);
                 document.getElementById('infoPanel').classList.remove('active');
             }
         });
