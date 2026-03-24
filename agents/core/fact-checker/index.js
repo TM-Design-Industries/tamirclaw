@@ -4,16 +4,17 @@
  */
 
 class FactChecker {
-  constructor() {
+  constructor(knowledgeBase = null) {
     this.verified_facts = {};
     this.known_contradictions = {};
     this.confidence_history = {};
+    this.kb = knowledgeBase; // Optional Knowledge Base for semantic search
   }
 
   /**
    * Main: Check all claims in agent output
    */
-  checkOutput(agent_output) {
+  async checkOutput(agent_output) {
     const result = {
       agent: agent_output.agent_name || 'Unknown',
       timestamp: new Date().toISOString(),
@@ -22,26 +23,31 @@ class FactChecker {
         total_claims: 0,
         verified: 0,
         likely: 0,
+        probable: 0,
         uncertain: 0,
         unverified: 0,
         blocked: 0
       },
       status: 'PASS',
       recommendation: null,
-      cleaned_output: agent_output
+      cleaned_output: agent_output,
+      knowledge_base_used: !!this.kb
     };
 
     // Extract all claims from output
     const claims = this._extractClaims(agent_output);
     result.summary.total_claims = claims.length;
 
-    // Check each claim
+    // Check each claim (async, with semantic search)
     for (const claim of claims) {
-      const checked = this._checkClaim(claim, agent_output);
+      const checked = await this._checkClaim(claim, agent_output);
       result.claims.push(checked);
 
       // Count by status
-      result.summary[checked.status.toLowerCase()]++;
+      const statusKey = checked.status.toLowerCase();
+      if (result.summary.hasOwnProperty(statusKey)) {
+        result.summary[statusKey]++;
+      }
 
       // Block if critical claim is unverified
       if (checked.is_critical && checked.status === 'UNVERIFIED') {
@@ -106,7 +112,7 @@ class FactChecker {
   /**
    * Check individual claim
    */
-  _checkClaim(claim, context) {
+  async _checkClaim(claim, context) {
     const result = {
       claim: claim.text,
       status: 'UNVERIFIED',
@@ -116,7 +122,8 @@ class FactChecker {
       evidence: null,
       notes: [],
       is_critical: claim.is_critical || false,
-      recommendation: 'ASK FOR SOURCE'
+      recommendation: 'ASK FOR SOURCE',
+      semantic_analysis: null
     };
 
     // Check if claim matches verified facts
@@ -133,6 +140,29 @@ class FactChecker {
       result.contradictions = this.known_contradictions[claim.text];
       result.status = 'BLOCKED';
       result.recommendation = 'CONTRADICTS KNOWN FACT';
+    }
+
+    // USE KNOWLEDGE BASE: Semantic search for similar claims
+    if (this.kb && result.status === 'UNVERIFIED') {
+      try {
+        const semanticResults = await this.kb.semanticSearch(claim.text, 5);
+        
+        if (semanticResults.length > 0) {
+          result.semantic_analysis = {
+            similar_projects: semanticResults,
+            top_similarity: semanticResults[0].similarity
+          };
+
+          // If very similar project exists, suggest it as reference
+          if (semanticResults[0].similarity > 0.7) {
+            result.notes.push(`Similar to past project: ${semanticResults[0].client}`);
+            result.confidence = 60; // Medium confidence if similar project exists
+            result.status = 'PROBABLE';
+          }
+        }
+      } catch (e) {
+        // Graceful fallback if KB unavailable
+      }
     }
 
     // Check if claim is reasonable/likely
@@ -304,7 +334,7 @@ class FactChecker {
         case 'check':
           return {
             success: true,
-            result: this.checkOutput(data.output)
+            result: await this.checkOutput(data.output)
           };
 
         case 'register_fact':

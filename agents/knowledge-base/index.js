@@ -105,6 +105,127 @@ class KnowledgeBaseAgent {
   }
 
   /**
+   * SEMANTIC SEARCH
+   * Find similar projects/facts using Gemini embeddings
+   */
+  async semanticSearch(query, limit = 5) {
+    try {
+      // Get embedding for query
+      const queryEmbedding = await this.getEmbedding(query);
+
+      // Calculate similarity with all stored projects
+      const similarities = [];
+
+      for (const [projectId, project] of this.projects) {
+        const similarity = this.cosineSimilarity(queryEmbedding, project.embedding);
+        similarities.push({
+          project_id: projectId,
+          client: project.client,
+          domain: project.domain,
+          brief: project.brief,
+          outcome: project.outcome,
+          cost: project.cost,
+          timeline: project.timeline,
+          similarity: similarity
+        });
+      }
+
+      // Sort by similarity (highest first)
+      similarities.sort((a, b) => b.similarity - a.similarity);
+
+      // Return top N results
+      return similarities.slice(0, limit);
+    } catch (error) {
+      console.log('[KB] Semantic search error:', error.message);
+      return [];
+    }
+  }
+
+  /**
+   * COSINE SIMILARITY
+   * Calculate similarity between two embeddings
+   */
+  cosineSimilarity(vecA, vecB) {
+    if (!vecA || !vecB || vecA.length !== vecB.length) return 0;
+
+    let dotProduct = 0;
+    let magnitudeA = 0;
+    let magnitudeB = 0;
+
+    for (let i = 0; i < vecA.length; i++) {
+      dotProduct += vecA[i] * vecB[i];
+      magnitudeA += vecA[i] * vecA[i];
+      magnitudeB += vecB[i] * vecB[i];
+    }
+
+    magnitudeA = Math.sqrt(magnitudeA);
+    magnitudeB = Math.sqrt(magnitudeB);
+
+    if (magnitudeA === 0 || magnitudeB === 0) return 0;
+
+    return dotProduct / (magnitudeA * magnitudeB);
+  }
+
+  /**
+   * VERIFY CLAIM
+   * Check claim against knowledge base for contradictions
+   */
+  async verifyClaim(claim) {
+    try {
+      // Search for similar claims/facts
+      const results = await this.semanticSearch(claim, 10);
+
+      if (results.length === 0) {
+        return {
+          verified: false,
+          status: 'UNVERIFIED',
+          reason: 'No similar past data found',
+          similar_projects: []
+        };
+      }
+
+      // Check if any similar results contradict the claim
+      const topResult = results[0];
+      const similarity = topResult.similarity;
+
+      if (similarity > 0.8) {
+        // Very similar project exists - check for conflicts
+        return {
+          verified: true,
+          status: 'SIMILAR_FOUND',
+          reason: `Similar project: ${topResult.client} (${topResult.domain})`,
+          similar_projects: results,
+          top_similarity: similarity,
+          recommendation: `Compare with: ${topResult.project_id}`
+        };
+      } else if (similarity > 0.5) {
+        // Moderately similar
+        return {
+          verified: false,
+          status: 'PROBABLE',
+          reason: 'Moderate similarity to past project',
+          similar_projects: results,
+          top_similarity: similarity
+        };
+      } else {
+        // Not similar
+        return {
+          verified: false,
+          status: 'UNVERIFIED',
+          reason: 'No similar projects found',
+          similar_projects: results
+        };
+      }
+    } catch (error) {
+      return {
+        verified: false,
+        status: 'ERROR',
+        error: error.message
+      };
+    }
+  }
+
+  /**
    * STORE PROJECT
    * Save project data with embeddings
    */
@@ -143,7 +264,8 @@ class KnowledgeBaseAgent {
       return {
         success: true,
         project_id: project_id,
-        stored: true
+        stored: true,
+        embedding_dim: embedding.length
       };
     } catch (error) {
       return {
