@@ -1,0 +1,34 @@
+{
+  "name": "Email Manager Agent",
+  "purpose": "Parse, prioritize, and route emails to appropriate agents",
+  "layer": "infrastructure",
+  "version": "1.0",
+  "inputs": {
+    "type": "object",
+    "required": ["action", "data"],
+    "properties": {
+      "action": {
+        "type": "string",
+        "enum": ["parse", "prioritize", "route", "archive", "list_unread"],
+        "description": "What action to perform"
+      },
+      "data": {
+        "type": "object",
+        "description": "Email data or filters"
+      }
+    }
+  },
+  "outputs": {
+    "type": "object",
+    "properties": {
+      "success": {"type": "boolean"},
+      "email_id": {"type": "string"},
+      "priority": {"type": "string"},
+      "suggested_route": {"type": "string"},
+      "action_required": {"type": "boolean"},
+      "data": {"type": "object"}
+    }
+  },
+  "decision_level": 1,
+  "decision_scope": "Email parsing and priority scoring - no judgment calls, pure pattern matching"
+}
