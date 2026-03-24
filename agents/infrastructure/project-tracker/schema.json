@@ -1,0 +1,33 @@
+{
+  "name": "Project Tracker Agent",
+  "purpose": "Create, update, and track project lifecycle",
+  "layer": "infrastructure",
+  "version": "1.0",
+  "inputs": {
+    "type": "object",
+    "required": ["action", "data"],
+    "properties": {
+      "action": {
+        "type": "string",
+        "enum": ["create", "update_status", "add_milestone", "get_status"],
+        "description": "What action to perform"
+      },
+      "data": {
+        "type": "object",
+        "description": "Varies by action"
+      }
+    }
+  },
+  "outputs": {
+    "type": "object",
+    "properties": {
+      "success": {"type": "boolean"},
+      "project_id": {"type": "string"},
+      "status": {"type": "string"},
+      "data": {"type": "object"},
+      "error": {"type": "string"}
+    }
+  },
+  "decision_level": 1,
+  "decision_scope": "Project creation and tracking - no judgment calls"
+}
