@@ -1,0 +1,36 @@
+{
+  "name": "synergy-optimizer",
+  "version": "2.0.0",
+  "description": "Portfolio synergy optimizer - strategically allocates resources to high-synergy venture clusters",
+  "type": "optimizer",
+  "inputs": {
+    "action": {
+      "type": "string",
+      "enum": ["optimize_clusters", "allocate_budget", "predict_impact", "recommend_strategies"]
+    },
+    "ventures": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "string"},
+          "synergy_with_others": {"type": "number"},
+          "current_resources": {"type": "number"},
+          "potential": {"type": "number"}
+        }
+      }
+    },
+    "total_budget": {"type": "number"}
+  },
+  "outputs": {
+    "optimization_result": {
+      "type": "object",
+      "properties": {
+        "high_synergy_clusters": {"type": "array"},
+        "recommended_allocation": {"type": "object"},
+        "expected_portfolio_return": {"type": "number"},
+        "optimization_strategy": {"type": "string"}
+      }
+    }
+  }
+}

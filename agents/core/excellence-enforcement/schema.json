@@ -1,0 +1,35 @@
+{
+  "name": "excellence-enforcement",
+  "version": "2.0.0",
+  "description": "Anti-mediocrity governor - enforces world-class quality standards",
+  "type": "quality-enforcer",
+  "inputs": {
+    "action": {
+      "type": "string",
+      "enum": ["evaluate_work", "set_threshold", "get_rejection_reasons", "appeal_decision"]
+    },
+    "work_submission": {
+      "type": "object",
+      "properties": {
+        "id": {"type": "string"},
+        "venture_id": {"type": "string"},
+        "type": {"type": "string", "enum": ["mission_critical", "standard", "infrastructure"]},
+        "quality_score": {"type": "number", "min": 0, "max": 10},
+        "description": {"type": "string"}
+      }
+    },
+    "appeal_reasoning": {"type": "string"}
+  },
+  "outputs": {
+    "verdict": {
+      "type": "object",
+      "properties": {
+        "status": {"type": "string", "enum": ["APPROVED", "REJECTED", "NEEDS_REVISION"]},
+        "threshold_required": {"type": "number"},
+        "score_received": {"type": "number"},
+        "reasons": {"type": "array"},
+        "required_actions": {"type": "array"}
+      }
+    }
+  }
+}
